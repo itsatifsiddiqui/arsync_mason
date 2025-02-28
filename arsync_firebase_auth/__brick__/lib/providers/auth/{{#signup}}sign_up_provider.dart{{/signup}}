@@ -1,0 +1,56 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../../models/app_user.dart';
+import '../../utils/utils.dart';
+import '../firebase_messaging_provider.dart';
+import '../firestore_provider.dart';
+import '../router_provider.dart';
+import 'auth_base_notifier.dart';
+
+final signupWithEmailPasswordProvider = StateNotifierProvider<
+  SignupWithEmailAndPasswordNotifier,
+  AsyncValue<AppUser?>
+>((ref) => SignupWithEmailAndPasswordNotifier(ref));
+
+class SignupWithEmailAndPasswordNotifier extends AuthBaseNotifier<AppUser?> {
+  SignupWithEmailAndPasswordNotifier(super.ref);
+
+  Future<void> signup(AppUser appUser, String password) async {
+    state = const AsyncValue.loading();
+    try {
+      final credential = await auth.createUserWithEmailAndPassword(
+        email: appUser.email,
+        password: password,
+      );
+
+      final user = credential.user;
+      if (user == null) throw Exception('User is null');
+      await user.sendEmailVerification();
+
+      'Auth Account Created'.log('Auth_Provider->signup');
+      'Verification email sent to ${user.email}'.log('Auth_Provider->signup');
+
+      final updatedAppuser = appUser.copyWith(
+        userid: user.uid,
+        photoURL: user.photoURL,
+        email: user.email!,
+        isEmailVerified: user.emailVerified,
+      );
+
+      final result = await ref
+          .read(firestoreProvider)
+          .createUser(updatedAppuser);
+
+      // Get device token and update user data
+      final token = await ref.read(firebaseMessagingProvider).getToken();
+      await ref.read(firestoreProvider).addToken(token, user.uid);
+
+      'Firestore User Created'.log('Auth_Provider->signup ${result!.userid}');
+      ref.read(routerProvider).navigateBasedAuthStatus();
+
+      state = AsyncValue.data(result);
+    } catch (e, s) {
+      handleError(e, s);
+    }
+  }
+}

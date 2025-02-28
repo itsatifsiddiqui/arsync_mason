@@ -1,0 +1,49 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+import '../../models/app_user.dart';
+import 'auth_base_notifier.dart';
+
+final loginWithAppleProvider =
+    StateNotifierProvider<LoginWithAppleNotifier, AsyncValue<AppUser?>>(
+      (ref) => LoginWithAppleNotifier(ref),
+    );
+
+class LoginWithAppleNotifier extends AuthBaseNotifier<AppUser?> {
+  LoginWithAppleNotifier(super.ref);
+
+  Future<void> loginWithApple() async {
+    state = const AsyncValue.loading();
+
+    try {
+      final appleResult = await SignInWithApple.getAppleIDCredential(
+        scopes: AppleIDAuthorizationScopes.values,
+      );
+
+      final credential = OAuthProvider('apple.com').credential(
+        accessToken: appleResult.authorizationCode,
+        idToken: appleResult.identityToken,
+      );
+
+      final name =
+          '${appleResult.givenName ?? ''} ${appleResult.familyName ?? ""}'
+              .trim();
+
+      final userCredential = await auth.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user == null) throw Exception('User is null');
+
+      await user.updateDisplayName(name);
+
+      final appUser = await processAuthenticatedUser(
+        user,
+        providerId: 'apple.com',
+      );
+      state = AsyncValue.data(appUser);
+    } catch (e, s) {
+      handleError(e, s);
+    }
+  }
+}
