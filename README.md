@@ -80,10 +80,10 @@ cd arsync_mason
 mason get
 
 # Generate code with the arsync_firebase_auth brick
-mason make arsync_firebase_auth
+mason add arsync_firebase_auth --path <path_to_cloned_repo>/arsync_firebase_auth
 
 # Generate code with the arsync_project brick
-mason make arsync_project
+mason add arsync_project --path <path_to_cloned_repo>/arsync_firebase_auth
 ```
 
 ### Managing Bricks
