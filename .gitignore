@@ -2,3 +2,4 @@
 .mason/
 mason-lock.json
 output/
+arsync_project/__brick__/custom_lint.log

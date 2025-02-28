@@ -1,0 +1,55 @@
+# RPS scripts
+scripts:
+  flutter:
+    get: flutter pub get
+    clean: flutter clean
+    outdated: flutter pub outdated
+    upgrade: flutter pub upgrade
+    gen_l10n: flutter gen-l10n
+
+  codegen:
+    build: dart run build_runner build --delete-conflicting-outputs
+    watch: dart run build_runner watch --delete-conflicting-outputs
+    icons: flutter pub get && dart run flutter_launcher_icons:main
+    splash: flutter pub get && flutter pub run flutter_native_splash:create
+    
+
+  lint:
+    dart: dart analyze
+    riverpod: dart run custom_lint
+    format: dart format lib
+
+  firebase:
+    start: firebase emulators:start --import=./firebase-data --export-on-exit=./firebase-data
+    startfresh: firebase emulators:start
+    stop: lsof -ti tcp:8080 | xargs kill -9 # Kill Firebase Emulators on port 8080
+    local: open "http://localhost:4000/"
+
+  ios:
+    pods:
+      install: cd ios && bundle exec pod install --repo-update && cd ..
+      clean: cd ios rm -rf Pods && rm Podfile.lock && bundle exec pod install --repo-update && cd ..
+      update: cd ios && bundle exec pod update && cd ..
+    build: flutter clean && flutter packages get && cd ios && pod update && pod install && flutter build ios && cd ../
+    buildnosign: flutter clean && flutter packages get && cd ios && pod update && pod install && flutter build ios --no-codesign && cd ../
+    buildiosverbose: flutter clean && flutter packages get && cd ios && pod update --verbose && pod install --verbose && flutter build ios && cd ../
+    buildiosnosignverbose: flutter clean && flutter packages get && cd ios && pod update --verbose &&  pod install --verbose && flutter build ios --no-codesign && cd ../
+
+  android:
+    build: flutter clean && flutter packages get && flutter build apk --release && flutter build appbundle && open ./build/app/outputs/apk/release
+    buildverbose: flutter clean && flutter packages get && flutter build apk --release --verbose
+    installrelease: cd build/app/outputs/apk/release && adb install app-release.apk && cd ../../../../../../
+    openapk: open build/app/outputs/apk/release
+
+  xcode:
+    open: open ./ios/*.xcworkspace/
+
+  deeplink:
+    android: adb shell am start -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "app_link_here" <bundle_id>
+    ios: xcrun simctl openurl booted "app_link_here"
+
+  kill8080: lsof -ti tcp:8080 | xargs kill -9 # Kill Firebase Emulators on port 8080
+  kill4000: lsof -ti tcp:4000 | xargs kill -9 # Kill Firebase Emulators on port 4000
+  kill5001: lsof -ti tcp:5001 | xargs kill -9 # Kill Firebase Emulators on port 5001
+  kill9099: lsof -ti tcp:9099 | xargs kill -9 # Kill Firebase Emulators on port 9099
+  kill9199: lsof -ti tcp:9199 | xargs kill -9 # Kill Firebase Emulators on port 9199

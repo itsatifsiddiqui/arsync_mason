@@ -1,0 +1,103 @@
+name: {{projectname.snakeCase()}}
+
+description: Arsync Solutions Flutter Project
+
+publish_to: "none"
+
+version: 0.0.1+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  hooks_riverpod: ^2.5.2
+  shared_preferences: ^2.3.2
+  flutter_hooks: ^0.20.5
+  intl: ^0.19.0
+  url_launcher: ^6.3.0
+  loading_overlay_pro: ^2.1.1
+  cached_network_image: ^3.4.1
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  go_router: ^14.8.0
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  arsync_exception_toolkit: ^0.0.8
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.1
+  custom_lint: ^0.6.4
+  riverpod_lint: ^2.3.10
+  build_runner: ^2.4.15
+  freezed: ^2.5.8
+  json_serializable: ^6.9.4
+
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon.png"
+  adaptive_icon_background: "assets/images/background.png"
+  adaptive_icon_foreground: "assets/images/foreground.png"
+  remove_alpha_ios: true
+
+
+### Uncomment this line to define a generate native splash screen
+
+# flutter_native_splash:
+#   color: "ffffff"
+#   color_dark: "F6F8FB"
+#   image: assets/images/splash.png
+#   android: true
+#   ios: true
+#   ios_content_mode: scaleAspectFill
+#   fullscreen: true # This makes the splash screen fullscreen on Android
+#   android_gravity: fill # This ensures the image fills the screen
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/fonts/
+
+
+formatter:  
+  page_width: 100
+  line_length: 100
+
+
+{{#hasCustomFont}}
+  fonts:
+    - family: {{{fontname}}}
+      fonts:
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-ExtraLight.ttf
+          weight: 100
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-Thin.ttf
+          weight: 200
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-Light.ttf
+          weight: 300
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/{{{fontname.titleCase()}}}-Black.ttf
+          weight: 900
+{{/hasCustomFont}}
