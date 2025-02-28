@@ -21,57 +21,7 @@ Make sure you have the [Mason CLI](https://pub.dev/packages/mason_cli) installed
 # Install Mason CLI
 dart pub global activate mason_cli
 ```
-
-### Using Bricks Locally
-
-#### Option 1: Clone the Repository
-
-Clone this repository and use the bricks directly:
-
-```bash
-git clone https://github.com/itsatifsiddiqui/arsync_mason.git
-cd arsync_mason
-
-# Get all dependencies
-mason get
-
-# Generate code with the arsync_firebase_auth brick
-mason make arsync_firebase_auth
-
-# Generate code with the arsync_project brick
-mason make arsync_project
-```
-
-#### Option 2: Add Bricks Globally
-
-To install bricks globally on your machine:
-
-```bash
-# Add the firebase auth brick globally
-mason add -g arsync_firebase_auth --git-url https://github.com/itsatifsiddiqui/arsync_mason.git --git-path arsync_firebase_auth
-
-# Add the project brick globally
-mason add -g arsync_project --git-url https://github.com/itsatifsiddiqui/arsync_mason.git --git-path arsync_project
-
-# Use the bricks from any directory
-mason make arsync_firebase_auth
-mason make arsync_project
-```
-
-### Managing Bricks
-
-#### List Installed Bricks
-
-View all installed bricks:
-
-```bash
-# List local bricks
-mason list
-# List global bricks
-mason ls -g
-```
-
-
+## Bricks
 
 ### arsync_project
 
@@ -97,6 +47,60 @@ A brick for setting up Firebase Authentication with various providers.
 
 
 
+### Using Bricks
+
+
+
+#### Option 1: Add Bricks Globally
+
+To install bricks globally on your machine:
+
+```bash
+# Add the firebase auth brick globally
+mason add -g arsync_firebase_auth --git-url https://github.com/itsatifsiddiqui/arsync_mason.git --git-path arsync_firebase_auth
+
+# Add the project brick globally
+mason add -g arsync_project --git-url https://github.com/itsatifsiddiqui/arsync_mason.git --git-path arsync_project
+
+# Use the bricks from any directory
+mason make arsync_firebase_auth
+mason make arsync_project
+
+```
+
+#### Option 2: Clone the Repository
+
+Clone this repository and use the bricks directly:
+
+```bash
+git clone https://github.com/itsatifsiddiqui/arsync_mason.git
+cd arsync_mason
+
+# Get all dependencies
+mason get
+
+# Generate code with the arsync_firebase_auth brick
+mason make arsync_firebase_auth
+
+# Generate code with the arsync_project brick
+mason make arsync_project
+```
+
+### Managing Bricks
+
+#### List Installed Bricks
+
+View all installed bricks:
+
+```bash
+# List local bricks
+mason list
+# List global bricks
+mason ls -g
+```
+
+
+
 ## Author
 
 **Atif Siddiqui**
@@ -108,3 +112,4 @@ A brick for setting up Firebase Authentication with various providers.
 ## About Arsync Solutions
 
 [Arsync Solutions](https://arsyncsolutions.com), We build Flutter apps for iOS, Android, and the web.
+
