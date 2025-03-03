@@ -53,3 +53,7 @@ custom_lint.log
 
 # Mason
 .mason/
+
+# Firebase emulator data
+firebase-data
+firebase-export-*

@@ -20,7 +20,7 @@ scripts:
     format: dart format lib
 
   firebase:
-    start: firebase emulators:start --import=./firebase-data --export-on-exit=./firebase-data
+    start: ./scripts/start_firebase_emulator.sh
     startfresh: firebase emulators:start
     stop: lsof -ti tcp:8080 | xargs kill -9 # Kill Firebase Emulators on port 8080
     local: open "http://localhost:4000/"
