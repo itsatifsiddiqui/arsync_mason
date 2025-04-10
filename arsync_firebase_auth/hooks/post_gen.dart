@@ -67,6 +67,7 @@ Future<void> run(HookContext context) async {
 
   // Core packages - always install these
   final corePackages = [
+    'firebase_core',
     'firebase_auth',
     'cloud_firestore',
     'firebase_messaging',
