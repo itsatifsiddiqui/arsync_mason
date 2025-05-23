@@ -3,3 +3,24 @@
 mason-lock.json
 output/
 arsync_project/__brick__/custom_lint.log
+
+# Mason/Dart build artifacts
+**/hooks/build/
+**/.dart_tool/
+*.dill
+
+# Flutter/Dart common build artifacts
+build/
+.packages
+.pub-cache/
+.pub/
+pubspec.lock
+
+# IDE artifacts
+.vscode/
+.idea/
+*.iml
+
+# OS artifacts
+.DS_Store
+Thumbs.db
