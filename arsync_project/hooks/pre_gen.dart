@@ -37,16 +37,19 @@ void run(HookContext context) async {
 
   // Display formatted instructions
   _logger.info('');
-  _logger
-      .info('╔════════════════════════════════════════════════════════════╗');
+  _logger.info(
+    '╔════════════════════════════════════════════════════════════╗',
+  );
   _logger.info('║             Arsync PROJECT GENERATOR                     ║');
-  _logger
-      .info('╚════════════════════════════════════════════════════════════╝');
+  _logger.info(
+    '╚════════════════════════════════════════════════════════════╝',
+  );
   _logger.info('');
   _logger.info('IMPORTANT INSTRUCTIONS:');
   _logger.info('');
   _logger.info(
-      '1. This generator should be run INSIDE a manually created project folder');
+    '1. This generator should be run INSIDE a manually created project folder',
+  );
   _logger.info('   It will NOT create a project folder for you');
   _logger.info('');
   _logger.info('2. If you haven\'t created a project folder yet, please:');
@@ -137,11 +140,13 @@ void run(HookContext context) async {
 }
 
 Future<void> _deleteDefaultProjectContent(
-    String currentProjectDirectory) async {
+  String currentProjectDirectory,
+) async {
   _logger.warn(currentProjectDirectory, tag: 'Current Project Directory');
 
-  final deleteProjectFilesProgress =
-      _logger.progress('Deleting Current Project Contents');
+  final deleteProjectFilesProgress = _logger.progress(
+    'Deleting Current Project Contents',
+  );
 
   final deleteContentResult = await Process.run(
     'rm',
@@ -159,6 +164,7 @@ Future<void> _deleteDefaultProjectContent(
       'analysis_options.yaml',
     ],
     workingDirectory: currentProjectDirectory,
+    runInShell: true,
   );
 
   if (deleteContentResult.stderr.toString().isNotEmpty) {
@@ -223,6 +229,7 @@ Future<String> _createFlutterProject(
       projectname,
     ],
     workingDirectory: projectDirectory,
+    runInShell: true,
   );
   if (result.stderr.toString().isNotEmpty) {
     createProjectProgress.fail(result.stderr.toString());
@@ -230,8 +237,9 @@ Future<String> _createFlutterProject(
   }
   createProjectProgress.complete('Project Created');
 
-  final currentProjectDirectory =
-      '$projectDirectory$projectname'.split(' ').join('\ ');
+  final currentProjectDirectory = '$projectDirectory$projectname'
+      .split(' ')
+      .join('\ ');
   return currentProjectDirectory;
 }
 

@@ -26,12 +26,12 @@ Future<void> _runFlutterPackagesUpgrade(String projectDirectory) async {
     'Running flutter packages upgrade --major-versions --tighten inside $projectDirectory',
   );
 
-  final result = await Process.run('flutter', [
-    'packages',
-    'upgrade',
-    '--major-versions',
-    '--tighten',
-  ], workingDirectory: projectDirectory);
+  final result = await Process.run(
+    'flutter',
+    ['packages', 'upgrade', '--major-versions', '--tighten'],
+    workingDirectory: projectDirectory,
+    runInShell: true,
+  );
 
   if (result.stderr.toString().isNotEmpty) {
     createProjectProgress.fail(result.stderr.toString());
@@ -43,10 +43,12 @@ Future<void> _runFlutterPackagesUpgrade(String projectDirectory) async {
 Future<void> _runFlutterPackagesGet(String projectDirectory) async {
   final createProjectProgress = logger.progress('Running flutter packages get');
 
-  final result = await Process.run('flutter', [
-    'packages',
-    'get',
-  ], workingDirectory: projectDirectory);
+  final result = await Process.run(
+    'flutter',
+    ['packages', 'get'],
+    workingDirectory: projectDirectory,
+    runInShell: true,
+  );
   if (result.stderr.toString().isNotEmpty) {
     createProjectProgress.fail(result.stderr.toString());
     throw Exception('Error Fetching Packages');
@@ -57,10 +59,12 @@ Future<void> _runFlutterPackagesGet(String projectDirectory) async {
 Future<void> _runDartFix(String projectDirectory) async {
   final createProjectProgress = logger.progress('Applying fixes');
 
-  final result = await Process.run('dart', [
-    'fix',
-    '--apply',
-  ], workingDirectory: projectDirectory);
+  final result = await Process.run(
+    'dart',
+    ['fix', '--apply'],
+    workingDirectory: projectDirectory,
+    runInShell: true,
+  );
   if (result.stderr.toString().isNotEmpty) {
     createProjectProgress.fail(result.stderr.toString());
     throw Exception('Applying Fixes Error');
@@ -139,7 +143,7 @@ Future<ShaKeys?> _generateDebugSha(String keyStorePath) async {
     keyStorePath,
     '-storepass',
     'android',
-  ]);
+  ], runInShell: true);
 
   if (result.exitCode != 0) {
     logger.err('Failed to generate debug SHA. Error: ${result.stderr}');
@@ -225,7 +229,7 @@ Future<ShaKeys?> _generateReleaseSha(String keyStorePath) async {
     keyStorePath,
     '-storepass',
     'arsynckeypass',
-  ]);
+  ], runInShell: true);
 
   if (result.exitCode != 0) {
     logger.err('Failed to generate release SHA. Error: ${result.stderr}');
