@@ -15,6 +15,7 @@ void run(HookContext context) async {
   await _runFlutterPackagesGet(projectDirectory);
   await _runDartFix(projectDirectory);
   await _runFlutterFormat(projectDirectory);
+  await _runBuildRunner(projectDirectory);
 
   logger.alert('Project Generated Successfully :)');
 
@@ -84,6 +85,29 @@ Future<void> _runFlutterFormat(String projectDirectory) async {
     throw Exception('Formatting Project Error');
   }
   createProjectProgress.complete('Project Formatted');
+}
+
+Future<void> _runBuildRunner(String projectDirectory) async {
+  final createProjectProgress = logger.progress('Running build runner');
+
+  final result = await Process.run(
+    'flutter',
+    [
+      'packages',
+      'pub',
+      'run',
+      'build_runner',
+      'build',
+      '--delete-conflicting-outputs',
+    ],
+    workingDirectory: projectDirectory,
+    runInShell: true,
+  );
+  if (result.stderr.toString().isNotEmpty) {
+    createProjectProgress.fail(result.stderr.toString());
+    throw Exception('Error Running Build Runner');
+  }
+  createProjectProgress.complete('Build Runner Completed');
 }
 
 Future<void> _generateAndDisplaySHA(String projectDirectory) async {
