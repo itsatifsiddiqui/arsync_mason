@@ -57,3 +57,7 @@ custom_lint.log
 # Firebase emulator data
 firebase-data
 firebase-export-*
+ios/build
+
+# Vscode Settings
+.vscode/settings.json
