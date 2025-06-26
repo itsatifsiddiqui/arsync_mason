@@ -70,7 +70,7 @@ class AuthRepository {
     await Future.delayed(const Duration(seconds: 2));
 
     final user = AppUser(
-      userid: 'userid',
+      userid: 'google_user',
       name: 'Google',
       email: 'google@gmail.com',
       isActive: true,
@@ -78,19 +78,22 @@ class AuthRepository {
 
     final createdUser = await userRepository.createUser(user);
 
+    sharedPreferences.setString('userid', user.userid);
+
     return createdUser;
   }
 
   Future<AppUser?> signInWithApple() async {
     await Future.delayed(const Duration(seconds: 2));
     final user = AppUser(
-      userid: 'userid',
+      userid: 'apple_user',
       name: 'Apple',
       email: 'apple@gmail.com',
       isActive: true,
     );
 
     final createdUser = await userRepository.createUser(user);
+    sharedPreferences.setString('userid', user.userid);
 
     return createdUser;
   }
