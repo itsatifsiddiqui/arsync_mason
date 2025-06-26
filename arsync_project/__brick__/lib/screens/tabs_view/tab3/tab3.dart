@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../utils/logging_extensions.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/primary_sheet.dart';
@@ -15,10 +14,7 @@ class Tab3 extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text('Alerts'),
-      ),
+      appBar: AppBar(elevation: 0, title: const Text('Alerts')),
       body: Column(
         children: [
           PrimaryButton(

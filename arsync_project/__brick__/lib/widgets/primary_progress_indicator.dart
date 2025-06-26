@@ -7,10 +7,7 @@ import '../utils/utils.dart';
 
 class PrimaryProgressIndicator extends StatelessWidget {
   final String? message;
-  const PrimaryProgressIndicator({
-    super.key,
-    this.message,
-  });
+  const PrimaryProgressIndicator({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +15,12 @@ class PrimaryProgressIndicator extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          if (Platform.isIOS) ...[
-            const CupertinoActivityIndicator(
-              radius: 20,
-            ),
-          ],
+          if (Platform.isIOS) ...[const CupertinoActivityIndicator(radius: 20)],
           if (Platform.isAndroid) ...[
             CircularProgressIndicator(
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).primaryColor,
+              ),
             ),
           ],
           const SizedBox(height: 20),

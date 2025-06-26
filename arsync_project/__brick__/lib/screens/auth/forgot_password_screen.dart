@@ -23,9 +23,7 @@ class ForgotPasswordScreen extends HookConsumerWidget {
     return PrimaryLoadingIndicator(
       isLoading: isLoading.value,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Forgot Password'),
-        ),
+        appBar: AppBar(title: const Text('Forgot Password')),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(16),
           child: Form(

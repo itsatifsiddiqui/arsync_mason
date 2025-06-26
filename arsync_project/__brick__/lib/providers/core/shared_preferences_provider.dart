@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../models/user/app_user.dart';
 import 'theme_provider.dart';
 
 ///Override provider in provider scope
@@ -29,5 +32,24 @@ class SharedPreferencesProvider {
 
   void setTheme(String theme) {
     prefs.setString(themeModeKey, theme);
+  }
+
+  // Saved User
+
+  String userKey(String userid) => 'user_$userid';
+
+  void saveUser(AppUser user) {
+    final userString = jsonEncode(user.toJson());
+    prefs.setString(userKey(user.userid), userString);
+  }
+
+  AppUser? getUser(String userid) {
+    final userString = prefs.getString(userKey(userid));
+    if (userString == null) return null;
+    return AppUser.fromJson(jsonDecode(userString));
+  }
+
+  void removeUser(String userid) {
+    prefs.remove(userKey(userid));
   }
 }

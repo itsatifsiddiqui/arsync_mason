@@ -47,23 +47,19 @@ class PrimaryErrorWidget<T> extends ConsumerWidget {
               minLines: 1,
               maxLines: 4,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.adaptive70,
-                fontSize: 22,
-              ),
+              style: TextStyle(color: context.adaptive70, fontSize: 22),
             ).px16(),
             const SizedBox(height: 16),
             SelectableText(
-              error.toString().toLowerCase().contains('SocketException'.toLowerCase())
+              error.toString().toLowerCase().contains(
+                    'SocketException'.toLowerCase(),
+                  )
                   ? 'No internet Connection'
                   : error.toString(),
               textAlign: TextAlign.center,
               minLines: 1,
               maxLines: 6,
-              style: TextStyle(
-                color: context.adaptive54,
-                fontSize: 18,
-              ),
+              style: TextStyle(color: context.adaptive54, fontSize: 18),
             ).px16(),
             const SizedBox(height: 12),
             if (providerToRefresh != null || onTryAgain != null)
@@ -76,13 +72,14 @@ class PrimaryErrorWidget<T> extends ConsumerWidget {
                 },
                 child: Text(
                   tryAgainText ?? 'Try Again',
-                  style: tryAgainTextStyle ??
+                  style:
+                      tryAgainTextStyle ??
                       TextStyle(
                         color: tryAgainTextColor ?? context.adaptive,
                         fontSize: tryAgainTextSize ?? 24,
                       ),
                 ),
-              )
+              ),
           ],
         ),
       ),

@@ -66,7 +66,8 @@ class PrimaryTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentBorder = border ??
+    final currentBorder =
+        border ??
         OutlineInputBorder(
           borderSide: BorderSide(width: 1, color: context.adaptive12),
           borderRadius: BorderRadius.circular(kBorderRadius),
@@ -114,12 +115,14 @@ class PrimaryTextField extends StatelessWidget {
               }
             },
             textAlignVertical: TextAlignVertical.center,
-            textInputAction: textInputAction ??
+            textInputAction:
+                textInputAction ??
                 (nextNode == null
                     ? TextInputAction.done
                     : TextInputAction.next),
             decoration: InputDecoration(
-              contentPadding: contentPadding ??
+              contentPadding:
+                  contentPadding ??
                   EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: (maxLines ?? 1) > 1 ? 16 : 0,

@@ -76,10 +76,7 @@ class PrimaryTitledDropDown<T> extends StatelessWidget {
           items: items.asMap().entries.map((e) {
             final key = e.key;
             final title = titles[key];
-            return DropdownMenuItem(
-              value: e.value,
-              child: Text(title),
-            );
+            return DropdownMenuItem(value: e.value, child: Text(title));
           }).toList(),
           onChanged: onChanged,
           isExpanded: true,

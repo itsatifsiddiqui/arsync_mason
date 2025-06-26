@@ -28,10 +28,9 @@ class PrimarySheet extends ConsumerWidget {
               width: 64,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -121,17 +120,16 @@ class DraggablePrimarySheet extends ConsumerWidget {
                     16.heightBox,
                     Text(
                       title!,
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ],
               ).p16(),
               Divider(height: 0, color: context.adaptive26),
-              ListView(
-                controller: controller,
-                children: [child],
-              ).expand()
+              ListView(controller: controller, children: [child]).expand(),
             ],
           ).safeArea(),
         );
@@ -257,8 +255,9 @@ class _ConfirmationSheetState extends State<ConfirmationSheet> {
     actions.add(
       PrimaryButton(
         onTap: handlePositiveAction,
-        text:
-            isPositiveActionLoading ? 'Loading...' : widget.positiveButtonText,
+        text: isPositiveActionLoading
+            ? 'Loading...'
+            : widget.positiveButtonText,
         isOutline: false,
         isLoading: isPositiveActionLoading,
         color: widget.positiveButtonColor,
@@ -294,7 +293,8 @@ class _ConfirmationSheetState extends State<ConfirmationSheet> {
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: widget.circleColor ??
+                  color:
+                      widget.circleColor ??
                       widget.iconColor?.withValues(alpha: 0.2) ??
                       context.adaptive12,
                 ),

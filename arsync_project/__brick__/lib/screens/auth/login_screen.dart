@@ -1,16 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../providers/auth/auth_provider.dart';
 import '../../utils/utils.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/primary_loading_indicator.dart';
 import '../../widgets/primary_text_field.dart';
-import '../tabs_view/home_tab/home_tab.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
@@ -28,12 +26,12 @@ class LoginScreen extends HookConsumerWidget {
       text: kDebugMode ? '123456' : null,
     );
 
-    final isLoading = useState(false);
+    final isLoading = ref.watch(authProvider).isLoading;
 
     final showPassword = useState(false);
 
     return PrimaryLoadingIndicator(
-      isLoading: isLoading.value,
+      isLoading: isLoading,
       child: Scaffold(
         appBar: AppBar(elevation: 0, title: const Text('Login Screen')),
         body: SingleChildScrollView(
@@ -70,10 +68,11 @@ class LoginScreen extends HookConsumerWidget {
                   keyboardType: TextInputType.visiblePassword,
                   onSubmitAction: () {
                     if (formkey.currentState!.validate() != true) return;
-                    final email = emailController.text.trim();
+                    final email = emailController.text.trim().toLowerCase();
                     final password = passwordController.text.trim();
-
-                    login(email, password, ref, isLoading);
+                    ref
+                        .read(authProvider.notifier)
+                        .signinWithEmailAndPassword(email, password);
                   },
                 ),
                 Align(
@@ -92,7 +91,9 @@ class LoginScreen extends HookConsumerWidget {
                     final email = emailController.text.trim();
                     final password = passwordController.text.trim();
 
-                    login(email, password, ref, isLoading);
+                    ref
+                        .read(authProvider.notifier)
+                        .signinWithEmailAndPassword(email, password);
                   },
                   text: 'Login',
                 ),
@@ -109,33 +110,5 @@ class LoginScreen extends HookConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> login(
-    String email,
-    String password,
-    WidgetRef ref,
-    ValueNotifier<bool> isLoading,
-  ) async {
-    final context = ref.context;
-
-    try {
-      isLoading.value = true;
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Simulate success/failure
-      final success = Random().nextBool();
-
-      // We throw error so it can be catched in catch code block.
-      if (!success) throw 'Login failed';
-
-      context.showSuccessSnackBar('Logged in successfully');
-      context.goNamed(HomeTab.routeName);
-    } catch (e) {
-      context.showExceptionSnackBar(e);
-    } finally {
-      isLoading.value = false;
-    }
   }
 }

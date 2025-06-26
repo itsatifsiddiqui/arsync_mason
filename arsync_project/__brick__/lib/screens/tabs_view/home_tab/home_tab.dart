@@ -11,10 +11,7 @@ class HomeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text('Home'),
-      ),
+      appBar: AppBar(elevation: 0, title: const Text('Home')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

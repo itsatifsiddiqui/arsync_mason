@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'app_theme.dart';
-import 'providers/router_provider.dart';
-import 'providers/theme_provider.dart';
+import 'providers/core/router_provider.dart';
+import 'providers/core/theme_provider.dart';
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -16,9 +16,7 @@ class MyApp extends ConsumerWidget {
       routerConfig: navigationProvider.router,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      {{#hasDarkMode}}
-      darkTheme: AppTheme.darkTheme,
-      {{/hasDarkMode}}
+
       themeMode: ref.watch(themeModeProvider),
       builder: (context, child) {
         return _Unfocus(child: child);

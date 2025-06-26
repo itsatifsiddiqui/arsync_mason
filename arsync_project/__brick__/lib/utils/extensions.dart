@@ -31,15 +31,14 @@ extension ExtendedStringExtension on String {
 }
 
 extension ExtendedNullStringExtension on String? {
-  bool get isBlank => this == null || (this?.isEmpty ?? false);
-  bool get isNotBlank => this != null || (this?.isNotEmpty ?? false);
+  bool get isBlank => this == null || this!.isEmpty;
+  //
+  bool get isNotBlank => isBlank == false;
 }
 
 extension ExtendedNullList on List? {
-  bool get isBlank => this == null || (this?.isEmpty ?? false);
-  bool get isNotBlank => this != null || (this?.isNotEmpty ?? false);
-  bool get allNotNull => !allNull;
-  bool get allNull => this!.every((e) => e == null);
+  bool get isBlank => this == null || this!.isEmpty;
+  bool get isNotBlank => isBlank == false;
 }
 
 extension ExtendedRandom on Random {

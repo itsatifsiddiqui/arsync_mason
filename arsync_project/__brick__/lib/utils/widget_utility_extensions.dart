@@ -12,57 +12,43 @@ extension GeneralUtilityExtensions on Widget {
   Widget centered({Key? key}) => Center(key: key, child: this);
 
   /// Extension method for [SafeArea] Widget
-  Widget safeArea(
-          {Key? key,
-          EdgeInsets minimum = EdgeInsets.zero,
-          bool maintainBottomViewPadding = false,
-          bool top = true,
-          bool bottom = true,
-          bool left = true,
-          bool right = true}) =>
-      SafeArea(
-        key: key,
-        minimum: minimum,
-        maintainBottomViewPadding: maintainBottomViewPadding,
-        top: top,
-        bottom: bottom,
-        left: left,
-        right: right,
-        child: this,
-      );
+  Widget safeArea({
+    Key? key,
+    EdgeInsets minimum = EdgeInsets.zero,
+    bool maintainBottomViewPadding = false,
+    bool top = true,
+    bool bottom = true,
+    bool left = true,
+    bool right = true,
+  }) => SafeArea(
+    key: key,
+    minimum: minimum,
+    maintainBottomViewPadding: maintainBottomViewPadding,
+    top: top,
+    bottom: bottom,
+    left: left,
+    right: right,
+    child: this,
+  );
 
   /// Extension for [Expanded]
   Expanded expand({Key? key, int flex = 1}) {
-    return Expanded(
-      key: key,
-      flex: flex,
-      child: this,
-    );
+    return Expanded(key: key, flex: flex, child: this);
   }
 
   /// Extension for [Flexible]
   Flexible flexible({Key? key, int flex = 1}) {
-    return Flexible(
-      key: key,
-      flex: flex,
-      child: this,
-    );
+    return Flexible(key: key, flex: flex, child: this);
   }
 
   /// Extension for aspectRatio with [AspectRatio]
   AspectRatio aspectRatio(double aspectRatio) {
-    return AspectRatio(
-      aspectRatio: aspectRatio,
-      child: this,
-    );
+    return AspectRatio(aspectRatio: aspectRatio, child: this);
   }
 
   /// Extension for adding a corner radius a widget with [ClipRRect]
   ClipRRect cornerRadius(double radius) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: this,
-    );
+    return ClipRRect(borderRadius: BorderRadius.circular(radius), child: this);
   }
 
   ///
@@ -120,18 +106,18 @@ extension GeneralUtilityExtensions on Widget {
   ///
   /// Extension method to scale any widget by specified [scalevalue] without wrapping or with dot operator.
   ///
-  Widget scale(
-          {Key? key,
-          double? scaleValue,
-          Offset? origin,
-          Alignment alignment = Alignment.center}) =>
-      Transform.scale(
-        key: key,
-        scale: scaleValue ?? 0,
-        alignment: alignment,
-        origin: origin,
-        child: this,
-      );
+  Widget scale({
+    Key? key,
+    double? scaleValue,
+    Offset? origin,
+    Alignment alignment = Alignment.center,
+  }) => Transform.scale(
+    key: key,
+    scale: scaleValue ?? 0,
+    alignment: alignment,
+    origin: origin,
+    child: this,
+  );
 
   SliverToBoxAdapter toBoxAdapter() {
     return SliverToBoxAdapter(child: this);

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../providers/router_provider.dart';
-import '../../../providers/shared_preferences_provider.dart';
-import '../../../providers/theme_provider.dart';
+import '../../../providers/auth/auth_provider.dart';
+import '../../../providers/core/shared_preferences_provider.dart';
+import '../../../providers/core/theme_provider.dart';
 import '../../../utils/utils.dart';
 import '../../../widgets/primary_button.dart';
 
@@ -15,10 +15,7 @@ class ProfileTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text('Profile'),
-      ),
+      appBar: AppBar(elevation: 0, title: const Text('Profile')),
       body: Column(
         children: [
           ...kThemeModes.keys.map((themeKey) {
@@ -28,6 +25,7 @@ class ProfileTab extends ConsumerWidget {
             );
           }),
           PrimaryButton(
+            isLoading: ref.watch(authProvider).isLoading,
             onTap: () async {
               final result = await context.showConfirmationDialog(
                 'Logout?',
@@ -35,11 +33,11 @@ class ProfileTab extends ConsumerWidget {
               );
 
               if (result != true) return;
-              ref.read(routerProvider).navigateBasedAuthStatus();
+              await ref.read(authProvider.notifier).logout();
             },
             color: Colors.red,
             text: 'Logout',
-          ).p16()
+          ).p16(),
         ],
       ),
     );

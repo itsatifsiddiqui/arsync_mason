@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../providers/auth/auth_provider.dart';
 import '../../utils/utils.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/primary_loading_indicator.dart';
@@ -23,17 +24,14 @@ class RegisterScreen extends HookConsumerWidget {
 
     final gender = useState<String?>(null);
 
-    final isLoading = useState(false);
+    final isLoading = ref.watch(authProvider).isLoading;
 
     final showPassword = useState(false);
 
     return PrimaryLoadingIndicator(
-      isLoading: isLoading.value,
+      isLoading: isLoading,
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          title: const Text('Register'),
-        ),
+        appBar: AppBar(elevation: 0, title: const Text('Register')),
         body: SingleChildScrollView(
           padding: EdgeInsets.all(16),
           child: Form(
@@ -89,11 +87,12 @@ class RegisterScreen extends HookConsumerWidget {
                   onTap: () async {
                     if (formkey.currentState!.validate() != true) return;
                     final name = nameController.text.trim();
-                    final email = emailController.text.trim();
+                    final email = emailController.text.trim().toLowerCase();
                     final password = passwordController.text.trim();
 
-                    register(
-                        name, email, password, gender.value, ref, isLoading);
+                    ref
+                        .read(authProvider.notifier)
+                        .signupWithEmailAndPassword(name, email, password);
                   },
                   text: 'Register',
                 ),

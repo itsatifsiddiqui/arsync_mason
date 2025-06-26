@@ -8,11 +8,6 @@ class Tab2 extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: const Text('Tab2'),
-      ),
-    );
+    return Scaffold(appBar: AppBar(elevation: 0, title: const Text('Tab2')));
   }
 }

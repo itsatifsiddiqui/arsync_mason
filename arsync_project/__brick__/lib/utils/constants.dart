@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const kBorderRadius = {{{borderRadius}}};
-
+const kBorderRadius = 8.0;
 
 Future<void> kLaunchUrl(String url) async {
   final uri = Uri.parse(url);

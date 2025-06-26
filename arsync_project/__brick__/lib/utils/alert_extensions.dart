@@ -111,14 +111,13 @@ extension AlertExtensions on BuildContext {
       context: this,
       builder: (context) {
         final titleWidget = Text(title);
-        final contentWidget =
-            () {
-              // Show Content as first priority
-              if (content != null) return content;
+        final contentWidget = () {
+          // Show Content as first priority
+          if (content != null) return content;
 
-              if (message != null) return Text(message);
-              return null;
-            }.call();
+          if (message != null) return Text(message);
+          return null;
+        }.call();
 
         onTap() => context.pop(popResult);
 
@@ -184,14 +183,13 @@ extension AlertExtensions on BuildContext {
         return StatefulBuilder(
           builder: (context, setState) {
             final titleWidget = Text(title);
-            final contentWidget =
-                () {
-                  // Show Content as first priority
-                  if (content != null) return content;
+            final contentWidget = () {
+              // Show Content as first priority
+              if (content != null) return content;
 
-                  if (message != null) return Text(message);
-                  return null;
-                }.call();
+              if (message != null) return Text(message);
+              return null;
+            }.call();
 
             Future<void> onActionTap() async {
               if (waitForActionResult) {
@@ -231,15 +229,13 @@ extension AlertExtensions on BuildContext {
               }
             }
 
-            final actionButtonChild =
-                isActionLoading
-                    ? const CupertinoActivityIndicator()
-                    : Text(actionText);
+            final actionButtonChild = isActionLoading
+                ? const CupertinoActivityIndicator()
+                : Text(actionText);
 
-            final actionButtonNegativeChild =
-                isActionNegativeLoading
-                    ? const CupertinoActivityIndicator()
-                    : Text(actionTextNegative);
+            final actionButtonNegativeChild = isActionNegativeLoading
+                ? const CupertinoActivityIndicator()
+                : Text(actionTextNegative);
 
             if (Platform.isAndroid) {
               return AlertDialog(

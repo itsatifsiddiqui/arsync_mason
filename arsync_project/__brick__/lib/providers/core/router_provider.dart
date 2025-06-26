@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../screens/auth/forgot_password_screen.dart';
-import '../screens/auth/login_screen.dart';
-import '../screens/auth/register_screen.dart';
-import '../screens/splash/splash_screen.dart';
-import '../screens/tabs_view/home_tab/home_tab.dart';
-import '../screens/tabs_view/profile/profile_tab.dart';
-import '../screens/tabs_view/tab2/tab2.dart';
-import '../screens/tabs_view/tab3/tab3.dart';
-import '../screens/tabs_view/tabs_view.dart';
+import '../../screens/auth/forgot_password_screen.dart';
+import '../../screens/auth/login_screen.dart';
+import '../../screens/auth/register_screen.dart';
+import '../../screens/splash/splash_screen.dart';
+import '../../screens/tabs_view/home_tab/home_tab.dart';
+import '../../screens/tabs_view/profile/profile_tab.dart';
+import '../../screens/tabs_view/tab2/tab2.dart';
+import '../../screens/tabs_view/tab3/tab3.dart';
+import '../../screens/tabs_view/tabs_view.dart';
+import '../auth/auth_provider.dart';
+import '../user/app_user_provider.dart';
 
 final routerProvider = Provider((ref) {
   return RouterProvider(ref);
@@ -67,12 +69,13 @@ class RouterProvider {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                    path: Tab2.routeLocation,
-                    name: Tab2.routeName,
-                    builder: (context, state) => const Tab2(),
-                    routes: [
-                      // Tab2 routes will be added here
-                    ]),
+                  path: Tab2.routeLocation,
+                  name: Tab2.routeName,
+                  builder: (context, state) => const Tab2(),
+                  routes: [
+                    // Tab2 routes will be added here
+                  ],
+                ),
               ],
             ),
             StatefulShellBranch(
@@ -125,7 +128,16 @@ class RouterProvider {
 
   // Initial navigation based on auth status
   Future<void> navigateBasedAuthStatus() async {
-    router.goNamed(LoginScreen.routeName);
+    final savedUser = await ref.read(authProvider.notifier).getUser();
+    // Not Logged In
+    if (savedUser == null) {
+      router.goNamed(LoginScreen.routeName);
+      return;
+    }
+
+    ref.read(appUserProvider.notifier).setUser(savedUser);
+
+    router.goNamed(HomeTab.routeName);
   }
 
   Future<void> navigateToNamed(String routeName, {Object? extra}) async {

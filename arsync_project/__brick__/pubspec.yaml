@@ -28,6 +28,7 @@ dependencies:
   freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
   arsync_exception_toolkit: ^0.0.9
+  cross_file: ^0.3.4+2
 
 
 dev_dependencies:

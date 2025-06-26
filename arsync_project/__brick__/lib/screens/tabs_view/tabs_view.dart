@@ -6,10 +6,7 @@ import '../../utils/utils.dart';
 
 class TabsView extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
-  const TabsView({
-    super.key,
-    required this.navigationShell,
-  });
+  const TabsView({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,9 +21,7 @@ class TabsView extends ConsumerWidget {
 
 class _BottomNavigationBar extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
-  const _BottomNavigationBar({
-    required this.navigationShell,
-  });
+  const _BottomNavigationBar({required this.navigationShell});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

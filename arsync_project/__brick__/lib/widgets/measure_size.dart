@@ -10,11 +10,7 @@ class MeasureSize extends StatefulWidget {
   /// the child widget
   final Function(Size) onChange;
 
-  const MeasureSize({
-    required this.onChange,
-    required this.child,
-    super.key,
-  });
+  const MeasureSize({required this.onChange, required this.child, super.key});
 
   @override
   State<MeasureSize> createState() => _MeasureSizeState();
@@ -28,10 +24,7 @@ class _MeasureSizeState extends State<MeasureSize> {
   @override
   Widget build(BuildContext context) {
     SchedulerBinding.instance.addPostFrameCallback(postFrameCallback);
-    return Container(
-      key: widgetKey,
-      child: widget.child,
-    );
+    return Container(key: widgetKey, child: widget.child);
   }
 
   void postFrameCallback(_) {

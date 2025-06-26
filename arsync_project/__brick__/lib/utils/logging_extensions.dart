@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer' as dev;
 
 extension ExtendedObject on Object? {
-  void log([String? logName]) => dev.log(toString(), name: logName ?? '');
+  void log([String? logName]) => dev.log(formatted, name: logName ?? '');
 
   String get formatted {
     if (this is Map) {
