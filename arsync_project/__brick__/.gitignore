@@ -47,6 +47,10 @@ app.*.map.json
 # Freezed & JSON serialization generated files
 *.g.dart
 *.freezed.dart
+*.gr.dart
+*.mocks.dart
+*.config.dart
+**/generated/
 
 # Custom Lint
 custom_lint.log

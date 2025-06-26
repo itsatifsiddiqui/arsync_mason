@@ -1,4 +1,14 @@
-have_fun: true
+have_fun: false
+ignore_patterns:
+  - "**/*.freezed.dart"
+  - "**/*.g.dart"
+  - "**/*.gr.dart"
+  - "**/generated/**"
+  - "**/.dart_tool/**"
+  - "**/build/**"
+  - "**/*.mocks.dart"
+  - "**/*.config.dart"
+  - "**/flutter_export_environment.sh"
 code_review:
   disable: false
   comment_severity_threshold: MEDIUM
