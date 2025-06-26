@@ -23,6 +23,8 @@ class PrimaryButton extends StatelessWidget {
     this.fontSize,
     this.fontFamily,
     this.borderRadius = kBorderRadius,
+    this.isBottomNavigationBar = false,
+    this.bottomNavigationBarPadding,
   });
 
   final bool isDisabled;
@@ -43,10 +45,12 @@ class PrimaryButton extends StatelessWidget {
   final double? fontSize;
   final String? fontFamily;
   final double borderRadius;
+  final bool? isBottomNavigationBar;
+  final EdgeInsets? bottomNavigationBarPadding;
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
+    final button = IgnorePointer(
       ignoring: isDisabled || isLoading,
       child: MaterialButton(
         splashColor: () {
@@ -117,12 +121,25 @@ class PrimaryButton extends StatelessWidget {
                       if (isOutline) return color ?? context.primaryColor;
                       return Colors.white;
                     }.call(),
-                    fontSize: fontSize ?? 16,
+                    fontSize: fontSize ?? 18,
                   ),
             ),
           );
         }).call(),
       ),
     );
+
+    if (isBottomNavigationBar == true) {
+      return SafeArea(
+        child: Padding(
+          padding:
+              bottomNavigationBarPadding ??
+              EdgeInsets.only(left: 24, right: 24, bottom: 8, top: 8),
+          child: button,
+        ),
+      );
+    }
+
+    return button;
   }
 }
