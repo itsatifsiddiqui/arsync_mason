@@ -138,8 +138,8 @@ Generated files (`.freezed.dart`, `.g.dart`) are NOT committed to version contro
 ## Architecture Guidelines
 
 For complete architecture details, refer to the comprehensive rules in:
-- `ai_instructions/architecture.md` - Complete 4-layer architecture specification
-- `ai_instructions/copilot_rules.md` - Coding conventions and widget patterns
-- `ai_instructions/.cursorrules` - Additional development guidelines
+- [Architecture](ai_instructions/architecture.md) - Complete 4-layer architecture specification
+- [Copilot Rules](ai_instructions/copilot_rules.md) - Coding conventions and widget patterns
+- [Cursor Rules](ai_instructions/.cursorrules) - Additional development guidelines
 
 **Important:** Always follow the strict provider type restrictions and layer communication rules defined in the architecture documentation.
