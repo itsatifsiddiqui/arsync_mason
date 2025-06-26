@@ -1,561 +1,417 @@
-# Flutter Application Architecture Guide
+# Instructions for Flutter Architecture
 
-## Overview
+You are a Flutter developer following a strict 4-layer architecture. This document contains ALL critical rules you MUST follow without exception.
 
-This document outlines the recommended architecture pattern for Flutter applications using a simplified 4-layer MVVM (Model-View-ViewModel) pattern. This approach ensures scalability, maintainability, and testability while keeping the architecture simple and focused.
+## Core Architecture Overview
 
-## Architecture Pattern: Simplified MVVM (4 Layers)
+This project uses a 4-layer architecture to prevent spaghetti code:
 
-### Architecture Diagram
+1. **Presentation Layer** (`screens/` and `widgets/`) - Dumb UI that only displays and reports user actions via callbacks
+2. **ViewModel Layer** (`providers/`) - Smart coordinators managing state and business logic  
+3. **Model Layer** (`models/`) - Immutable data structures with Freezed and Json Serialization
+4. **Repository Layer** (`repositories/`) - Data access abstraction
 
-```mermaid
-graph TB
-    subgraph "Presentation Layer"
-        V[Views/Screens] --> VM[ViewModels/Providers]
-        V --> W[Widgets]
-        V --> H[Hooks]
-    end
-    
-    subgraph "Business Logic Layer"
-        VM[ViewModels/Providers]
-    end
-    
-    subgraph "Model Layer"
-        M[Models/Entities]
-    end
-    
-    subgraph "Repository Layer"
-        R[Repositories] --> DS[Data Sources]
-        DS --> API[Remote API]
-        DS --> DB[Local Database]
-        DS --> SP[Shared Preferences]
-        DS --> FB[Firebase]
-    end
-    
-    subgraph "Core"
-        E[Extensions]
-        U[Utils]
-        C[Constants]
-        T[Themes]
-        ER[Error Handling]
-    end
-    
-    V -.-> E
-    V -.-> U
-    V -.-> C
-    V -.-> T
-    VM --> M
-    VM --> R
-    VM -.-> ER
-    R --> M
-    
-    style V fill:#e1f5fe
-    style VM fill:#f3e5f5
-    style M fill:#e8f5e8
-    style R fill:#fff3e0
-    style DS fill:#fce4ec
-```
+## CRITICAL LAYER COMMUNICATION RULES
 
-## Layer Responsibilities
+### ✅ ALLOWED
+- Presentation → ViewModel
+- ViewModel → Repository
+- ViewModel → Model
+- Repository <- Model
 
-### 1. Presentation Layer (Views/Screens)
+### ❌ FORBIDDEN
+- Presentation → Repository
+- Presentation → Direct Data Sources (Firebase/API)
+- Model → Any other layer
+- BuildContext in ViewModels
+- Business logic in Widgets
 
-#### Views/Screens
-- **Responsibility**: UI rendering and user interaction handling
-- **Components**: Screens, Pages, Dialogs
-- **Rules**:
-  - must be stateless
-  - Mostly Use `HookConsumerWidget` or `ConsumerWidget`
-  - Handle only UI logic
-  - No business logic
-  - No direct data access
-  - Communicate only with ViewModels/Providers
-  - Define controllers using `useTextEditingController`
-  - Use `useState` for simple state management
-  - Use `useEffect` for side effects
-  - Use `useMemo` for memoization
+## 1. PRESENTATION LAYER - Complete Rules
 
-#### Body Widget Structure Rules
-- **Keep the body widget lean and organized**
-- **The body widget must not contain any Rows or Columns except the root level scrollable widget**
-- **Break down complex UI into private widget classes**
-- **Use composition over large widget trees**
+### Golden Rule: Widgets Must Be DUMB
+- Shows what it's told
+- Doesn't decide what to display
+- Doesn't fetch data
+- Just displays and reports user actions
+- Create small, composable widgets over large monolithic ones
+- Use flex values in Rows/Columns for responsive design
+- Define theme properties in MaterialApp's theme rather than hardcoding
 
+### Code Style
+- Use log from logging_extensions.dart for logging (not print or debugPrint)
+- Follow Flutter's linting rules defined in analysis_options.yaml
+
+
+### Widget Types (USE ONLY THESE)
+
+#### StatelessWidget - Simple Display
 ```dart
-class LoginScreen extends HookConsumerWidget {
-  static String get routeName => 'login';
-  static String get routeLocation => '/$routeName';
-  
-  const LoginScreen({super.key});
-  
+class ProductCard extends StatelessWidget {
+  final Product product;
+  final VoidCallback? onTap;
+  final VoidCallback? onFavorite;
+
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.onTap,
+    this.onFavorite,
+  });
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Hooks at the top
-    final emailController = useTextEditingController(
-      text: kDebugMode ? 'atif@gmail.com' : null,
-    );
-    final passwordController = useTextEditingController(
-      text: kDebugMode ? '123456' : null,
-    );
-    
-    // Provider watches - only watch ViewModels/Providers
-    final authState = ref.watch(authProvider);
-    final isLoading = authState.isLoading;
-    
-    // Effects
-    useEffect(() {
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-      return SystemChrome.restoreSystemUIOverlays;
-    }, []);
-    
-    return Scaffold(
-      body: Column(
+  Widget build(BuildContext context) {
+    return PrimaryCard(
+      onTap: onTap,
+      child: Column(
         children: [
-          PrimaryTextField(
-            controller: emailController,
-            title: 'Email',
-            validator: Validators.emailValidator,
-          ),
-          PrimaryTextField(
-            controller: passwordController,
-            title: 'Password',
-            validator: Validators.passwordValidator,
-            obscureText: true,
-          ),
+          Text(product.name),
           PrimaryButton(
-            onTap: () => _handleLogin(ref, emailController.text, passwordController.text),
-            text: 'Login',
+            text: 'Add to Cart',
+            onPressed: onTap,
           ),
         ],
       ),
     );
   }
 }
+```
 
-
-class DetailScreen extends HookConsumerWidget {
-  static String get routeName => 'details';
-  static String get routeLocation => '/$routeName';
-  
-  const DetailScreen({super.key});
-  
+#### ConsumerWidget - Watch ViewModels
+```dart
+class ProductListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final productsState = ref.watch(productsProvider);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Details')),
-      body: SingleChildScrollView(  // Only root level scrollable widget allowed
-        padding: EdgeInsets.all(16),
-        child: Column(  // Only Column/Row allowed at root level
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: productsState.when(
+        data: (products) => ListView.builder(
+          itemCount: products.length,
+          itemBuilder: (context, index) => ProductCard(
+            product: products[index],
+            onTap: () => ref.read(productsProvider.notifier).addToCart(products[index].id),
+          ),
+        ),
+        loading: () => PrimaryProgressIndicator(),
+        error: (error, stack) => PrimaryErrorWidget(
+          error: error,
+          providerToRefresh: productsProvider,
+        ),
+      ),
+    );
+  }
+}
+```
+
+#### HookConsumerWidget - Local UI State + ViewModels
+```dart
+class LoginScreen extends HookConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final isPasswordVisible = useState(false);
+    final formKey = GlobalObjectKey<FormState>(context);
+    final authState = ref.watch(authProvider);
+
+    return Scaffold(
+      body: Form(
+        key: formKey,
+        child: Column(
           children: [
-            // ✅ Break down into private widgets
-            _ImageSection(movieShow: movieShow),
-            _VenueAndMovieName(movieShow: movieShow),
-            ...
-            ...
-            ...
+            PrimaryTextField(
+              controller: emailController,
+              title: 'Email',
+              validator: Validators.emailValidator,
+            ),
+            PrimaryTextField(
+              controller: passwordController,
+              title: 'Password',
+              validator: Validators.passwordValidator,
+              obscureText: !isPasswordVisible.value,
+            ),
+            PrimaryButton(
+              text: 'Login',
+              isLoading: authState.isLoading,
+              onPressed: () {
+                if (formKey.currentState?.validate() != true) return;
+                ref.read(authProvider.notifier).login(
+                  emailController.text.trim(),
+                  passwordController.text.trim(),
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
 }
+```
 
-// ✅ CORRECT: Private widgets for complex UI sections
-class _ImageSection extends StatelessWidget {
-  final MovieShowModel movieShow;
-  const _ImageSection({required this.movieShow});
+### MANDATORY Design System Widgets
+- `PrimaryButton` NOT `ElevatedButton`
+- `PrimaryTextField` NOT `TextField`
+- `PrimaryCard` NOT `Card`
+- `PrimaryProgressIndicator` NOT `CircularProgressIndicator`
+- `PrimaryErrorWidget` for errors
+- `PrimaryInfoWidget` for info
+- `PrimarySheet` for bottom sheets
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-        children: [
-            ...
-            ...
-            ...
-        ],
-      );
-  }
-}
+### MANDATORY Color and Image Guidelines
+- **Colors**: NEVER hardcode colors. Always use colors from `AppTheme` class (e.g., `AppTheme.primaryLight`, `context.theme.primaryColor`)
+- **Images**: NEVER hardcode image paths. Always define image paths in `lib/utils/images.dart` and reference them (e.g., `Images.logo`)
 
-class _VenueAndMovieName extends StatelessWidget {
-  const _VenueAndMovieName({required this.movieShow});
-  final MovieShowModel movieShow;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ... 
-        ...
-      ],
-    );
-  }
-}
-
-
-// ❌ WRONG: Don't put complex Rows/Columns directly in body
-class BadExample extends HookConsumerWidget {
+### Breaking Complex Screens - Use Private Widgets NOT Methods
+```dart
+// ✅ CORRECT
+class _AppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: Column(  // ❌ This is getting too complex
-        children: [
-          Row(  // ❌ Complex Row in body
-            children: [
-              Column(  // ❌ Nested Column in body
-                children: [
-                  // ... many widgets
-                ],
-              ),
-              Column(  // ❌ Another nested Column
-                children: [
-                  // ... many widgets
-                ],
-              ),
-            ],
-          ),
-          // ... more complex widgets
-        ],
-      ),
-    );
+    return AppBar(title: Text('Products'));
   }
+  
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
 
-#### Widgets
-- **Responsibility**: Reusable UI components
-- **Components**: Custom widgets, compound widgets
-- **Rules**:
-  - Should be highly reusable
-  - Parameterized for customization
-  - No business logic
-  - Focus on single responsibility
-  - Use `PrimaryButton` for buttons
-  - Use `PrimaryTextField` for text fields
-  - Use `PrimaryCard` for cards
-  - Use `PrimaryErrorWidget` for error messages
-  - Use `PrimaryInfoWidget` for info messages
-  - Use `PrimaryLoadingIndicator` for loading indicators
-  - Use `PrimaryProgressIndicator` for progress indicators
-  - Use `PrimarySheet` for sheets
-  - Use `PrimaryTitledDropDown` for drop downs
+// ❌ WRONG
+Widget _buildAppBar() => AppBar(title: Text('Products'));
+```
 
-#### Hooks
-- **Responsibility**: Stateful logic encapsulation
-- **Components**: Custom hooks for common patterns
-- **Rules**:
-  - Encapsulate stateful logic
-  - Promote reusability
-  - Handle lifecycle management
+## 2. VIEWMODEL LAYER - Complete Rules
 
-### 2. Business Logic Layer (ViewModels/Providers)
+### ONLY Use These Provider Types
 
-#### ViewModels/Providers - STRICT PROVIDER RULES
-- **Responsibility**: State management and business logic coordination
-- **Error Handling**: use the ref.showExceptionSheet(e) to show error messages from the ViewModel
-- **HARD LIMIT**: Only use these provider types:
-  - `NotifierProvider<T, State>` - For synchronous state management 
-  - `AsyncNotifierProvider<T, State>` - For asynchronous state management
-  - `StreamNotifierProvider<T, State>` - For stream-based state management
-  - `FutureProvider<T, State>` - For simple data fetching (not in ViewModel layer)
-  - `StreamProvider<T, State>` - For simple stream data (not in ViewModel layer)
-
-**FORBIDDEN PROVIDERS IN VIEWMODEL LAYER:**
-- ❌ `StateProvider` 
-- ❌ `StateNotifierProvider` 
-- ❌ `ChangeNotifierProvider`
-- ❌ `FutureProvider`
-- ❌ `StreamProvider`
-- ❌ `Provider` (except for dependency injection)
-
+#### NotifierProvider - Synchronous State
 ```dart
-// ✅ CORRECT: Using NotifierProvider for ViewModel
-final authProvider = NotifierProvider<AuthProvider, AsyncValue<void>>(() {
-  return AuthProvider();
+final counterProvider = NotifierProvider<CounterNotifier, int>(() {
+  return CounterNotifier();
 });
 
-class AuthProvider extends Notifier<AsyncValue<void>> {
+class CounterNotifier extends Notifier<int> {
   @override
-  AsyncValue<void> build() {
-    return const AsyncValue.data(null);
+  int build() => 0;
+
+  void increment() => state++;
+  void decrement() => state--;
+}
+```
+
+#### AsyncNotifierProvider - Asynchronous Operations
+```dart
+final userProfileProvider = AsyncNotifierProvider<UserProfileNotifier, AppUser>(() {
+  return UserProfileNotifier();
+});
+
+class UserProfileNotifier extends AsyncNotifier<AppUser> {
+  @override
+  Future<AppUser> build() async {
+    final userId = ref.watch(currentUserIdProvider);
+    return ref.read(userRepositoryProvider).getUserProfile(userId);
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> updateProfile(AppUser updatedUser) async {
     state = const AsyncValue.loading();
     try {
-      // Business logic coordination
-      final user = await ref.read(authRepositoryProvider).login(email, password);
-      
-      // Update other providers/state
-      ref.read(sharedPreferencesProvider).saveUser(user);
-      await ref.read(routerProvider).navigateBasedAuthStatus();
-      
-      state = const AsyncValue.data(null);
+      final result = await ref.read(userRepositoryProvider).updateProfile(updatedUser);
+      state = AsyncValue.data(result);
     } catch (e, s) {
       state = AsyncValue.error(e, s);
       ref.showExceptionSheet(e);
     }
   }
-
-  ... other methods
 }
+```
 
-// ✅ CORRECT: Using AsyncNotifierProvider for async ViewModels
-final userProfileProvider = AsyncNotifierProvider<UserProfileNotifier, UserProfile>(() {
-  return UserProfileNotifier();
+#### StreamNotifierProvider - Real-time Streams
+```dart
+final messagesProvider = StreamNotifierProvider<MessagesNotifier, List<Message>>(() {
+  return MessagesNotifier();
 });
 
-class UserProfileNotifier extends AsyncNotifier<UserProfile> {
+class MessagesNotifier extends StreamNotifier<List<Message>> {
   @override
-  Future<UserProfile> build() async {
-    final userId = ref.watch(currentUserIdProvider);
-    return ref.read(userRepositoryProvider).getUserProfile(userId);
+  Stream<List<Message>> build() {
+    final chatId = ref.watch(currentChatIdProvider);
+    return ref.read(messageRepositoryProvider).getMessagesStream(chatId);
   }
 
-  Future<void> updateProfile(UserProfile profile) async {
-    state = const AsyncValue.loading();
+  Future<void> sendMessage(String content) async {
     try {
-      final updatedProfile = await ref.read(userRepositoryProvider).updateProfile(profile);
-      state = AsyncValue.data(updatedProfile);
+      final chatId = ref.read(currentChatIdProvider);
+      await ref.read(messageRepositoryProvider).sendMessage(chatId, content);
     } catch (e, s) {
-      state = AsyncValue.error(e, s);
+      ref.showExceptionSheet(e);
     }
   }
 }
 ```
 
-**Rules for ViewModels/Providers:**
-- Manage UI state and coordinate business operations
-- Communicate with Repository layer
-- Transform data for UI consumption
-- Handle error states and loading states
-- Coordinate between multiple repositories if needed
-- Never directly access data sources
-
-### 3. Model Layer (Models/Entities)
-
-#### Models/Entities
-- **Responsibility**: Data structure definition and business entities
-- **Components**: Data classes, entities, value objects
-- **Rules**:
-  - Immutable data structures using Freezed
-  - Include validation logic
-  - JSON serialization support
-  - Shared between ViewModels and Repositories
-
+#### StateProvider - Simple UI State ONLY
 ```dart
-@freezed
-abstract class AppUser with _$AppUser {
-  const factory AppUser({
-    String? userid,
-    required String name,
-    required String email,
-    String? photoURL,
-    required bool isEmailVerified,
-  }) = _AppUser;
+// ✅ ALLOWED: Simple UI state
+final selectedTabProvider = StateProvider<int>((ref) => 0);
+final searchQueryProvider = StateProvider<String>((ref) => '');
+final isPasswordVisibleProvider = StateProvider<bool>((ref) => false);
 
-  const AppUser._();
-
-  factory AppUser.fromJson(Map<String, dynamic> json) =>
-      _$AppUserFromJson(json);
-
-  factory AppUser.fromFirestore(Map<String, dynamic> json, String id) {
-    return _$AppUserFromJson(json).copyWith(id: id);
-  }
-      
-  // Custom methods for business logic
-  bool get isProfileComplete => 
-      name.isNotEmpty && email.isNotEmpty && photoURL != null;
-      
-  String get displayName => name.isEmpty ? email.split('@').first : name;
-}
+// ❌ FORBIDDEN: Complex objects
+final userProvider = StateProvider<User>((ref) => User.empty()); // NEVER!
 ```
 
-### 4. Repository Layer
-
-#### Repositories
-- **Responsibility**: Data access abstraction and coordination
-- **Components**: Repository interfaces and implementations
-- **Rules**:
-  - Abstract data sources
-  - Handle data transformation between data sources and models
-  - Implement caching strategies
-  - Error handling and retry logic
-  - Return Models/Entities to ViewModels
-
+#### FutureProvider/StreamProvider - Read-Only Data
 ```dart
-// ✅ CORRECT: Repository provider (allowed Provider usage)
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final sharedPreferences = ref.read(sharedPreferencesProvider).prefs;
-  return AuthRepository(sharedPreferences);
+// Read-only data fetching
+final userProfileProvider = FutureProvider.family<User, String>((ref, userId) async {
+  return ref.read(userRepositoryProvider).getUserById(userId);
 });
 
-class AuthRepository {
-  final SharedPreferences prefs;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
-  AuthRepository(this.prefs);
+// Read-only stream
+final messagesProvider = StreamProvider.family<List<Message>, String>((ref, chatId) {
+  return ref.read(messageRepositoryProvider).getMessagesStream(chatId);
+});
+```
 
-  Future<AppUser> login(String email, String password) async {
-    final userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+### ❌ NEVER USE
+- StateNotifierProvider (deprecated)
+- ChangeNotifierProvider
 
-    if (userCredential.user == null) throw Exception('Failed to login');
-
-    final userid = userCredential.user!.uid;
-    final appUser = await _getFirestoreUser(userid);
-
-    return appUser;
-  }
-
-  Future<AppUser> _getFirestoreUser(String userid) async {
-    final userDoc = await _firestore.collection('users').doc(userid).get();
-    if (userDoc.data() == null) throw Exception('User not found');
-    return AppUser.fromJson(userDoc.data()!);
+### Error Handling - ALWAYS Use ref.showExceptionSheet(e)
+```dart
+Future<void> someAction() async {
+  state = const AsyncValue.loading();
+  try {
+    final result = await ref.read(repository).getData();
+    state = AsyncValue.data(result);
+  } catch (e, s) {
+    state = AsyncValue.error(e, s);
+    ref.showExceptionSheet(e); // ALWAYS do this
   }
 }
 ```
 
-## Project Structure
+## Recommended Project Structure
 
 ```
 lib/
-├── main.dart         # Entry point
-├── my_app.dart       # App configuration  
-├── app_theme.dart    # Theme configuration
-├── models/           # Data models and DTOs using Freezed (Models/Entities layer)
-├── providers/        # Riverpod providers and state management (ViewModels/Providers layer)
-├── screens/          # UI screens and pages (Views/Screens layer)
-├── widgets/          # Reusable UI components
-├── hooks/            # Custom Flutter Hooks
-├── utils/            # Utility functions and helpers
-└── repositories/     # Data access layer (Repository layer)
+├── main.dart                    # App entry point
+├── my_app.dart                  # MyApp widget
+├── app_theme.dart               # App theme configuration
+├── firebase_options.dart        # Firebase configuration
+│
+├── hooks/                       # Custom React hooks
+│   ├── keyboard_visibility.dart
+│   └── periodic_refresh.dart
+│
+├── models/                      # 📦 MODEL LAYER
+│   ├── user/
+│   │   ├── app_user.dart
+│   │   ├── app_user.freezed.dart
+│   │   └── app_user.g.dart
+│   ├── product/
+│   │   ├── state/
+│   │   │   ├── products_state.dart
+│   │   │   └── search_state.dart
+│   │   ├── product.dart
+│   │   ├── product.freezed.dart
+│   │   └── product.g.dart
+│   ├── order/
+│   │   ├── order.dart
+│   │   ├── cart.dart
+│   │   └── order_status.dart
+│   └── common/
+│       ├── app_config.dart
+│       └── api_response.dart
+│
+├── providers/                   # 🧠 VIEWMODEL LAYER
+│   ├── auth/
+│   │   ├── auth_provider.dart
+│   │   ├── login_provider.dart
+│   │   └── signup_provider.dart
+│   ├── user/
+│   │   ├── app_user_provider.dart
+│   │   └── user_profile_provider.dart
+│   ├── product/
+│   │   ├── products_provider.dart
+│   │   └── product_search_provider.dart
+│   ├── order/
+│   │   ├── cart_provider.dart
+│   │   └── checkout_provider.dart
+│   ├── core/
+│   │   ├── router_provider.dart
+│   │   ├── theme_provider.dart
+│   │   ├── shared_preferences_provider.dart
+│   │   └── base_provider.dart
+│   └── services/
+│       ├── firebase_messaging_provider.dart
+│       └── location_provider.dart
+│
+├── repositories/                # 🗄️ REPOSITORY LAYER
+│   ├── auth_repository.dart
+│   ├── user_repository.dart
+│   ├── product_repository.dart
+│   ├── order_repository.dart
+│   └── message_repository.dart
+│
+├── screens/                     # 🎨 PRESENTATION LAYER
+│   ├── auth/
+│   │   ├── login_screen.dart
+│   │   ├── signup_screen.dart
+│   │   ├── forgot_password_screen.dart
+│   │   └── widgets/
+│   │       ├── auth_header_widget.dart
+│   │       └── social_login_buttons.dart
+│   ├── splash/
+│   │   └── splash_screen.dart
+│   ├── tabs_view/
+│   │   ├── tabs_view.dart
+│   │   ├── home_tab/
+│   │   │   ├── home_screen.dart
+│   │   │   └── widgets/
+│   │   ├── profile_tab/
+│   │   │   ├── profile_screen.dart
+│   │   │   ├── edit_profile_screen.dart
+│   │   │   └── widgets/
+│   │   └── messages_tab/
+│   │       ├── messages_screen.dart
+│   │       ├── chat_screen.dart
+│   │       └── widgets/
+│   └── products/
+│       ├── products_screen.dart
+│       ├── product_details_screen.dart
+│       ├── product_search_screen.dart
+│       └── widgets/
+│           ├── product_card.dart
+│           └── product_filter.dart
+│
+├── widgets/                     # 🎨 SHARED UI COMPONENTS
+│   ├── primary_button.dart
+│   ├── primary_card.dart
+│   ├── primary_text_field.dart
+│   ├── primary_error_widget.dart
+│   ├── primary_loading_indicator.dart
+│   ├── primary_progress_indicator.dart
+│   ├── primary_sheet.dart
+│   ├── primary_info_widget.dart
+│   ├── primary_titled_drop_down.dart
+│   └── measure_size.dart
+│
+├── utils/                       # 🔧 UTILITIES
+│   ├── constants.dart
+│   ├── app_colors.dart
+│   ├── validators.dart
+│   ├── extensions.dart
+│   ├── utils.dart
+│   ├── images.dart
+│   ├── debouncer.dart
+│   ├── exception_toolkit.dart
+│   ├── alert_extensions.dart
+│   └── ref_extensions.dart
+│
+└── services/                    # 🔧 EXTERNAL SERVICES
+    ├── analytics_service.dart
+    ├── location_service.dart
+    ├── permissions_service.dart
+    └── video_service.dart
+
 ```
-
-
-## Communication Flow
-
-### Data Flow Example (Login Process)
-
-1. **View Layer**: `LoginScreen` captures user input
-2. **ViewModel Layer**: `AuthProvider.login()` receives email/password
-3. **Repository Layer**: `AuthRepository.login()` handles authentication
-4. **Model Layer**: `AppUser` model represents the authenticated user
-5. **Back to ViewModel**: `AuthProvider` updates state with user data
-6. **Back to View**: `LoginScreen` reacts to state changes
-
-```dart
-// 1. View captures input and calls ViewModel
-void _handleLogin(WidgetRef ref, String email, String password) {
-  ref.read(authProvider.notifier).login(email, password);
-}
-
-// 2. ViewModel coordinates business logic
-Future<void> login(String email, String password) async {
-  state = const AsyncValue.loading();
-  try {
-    // 3. Repository handles data operations
-    final user = await ref.read(authRepositoryProvider).login(email, password);
-    
-    // 4. Model represents the data
-    // user is of type AppUser
-    
-    // 5. ViewModel updates state
-    ref.read(sharedPreferencesProvider).saveUser(user);
-    await ref.read(routerProvider).navigateBasedAuthStatus();
-    state = const AsyncValue.data(null);
-  } catch (e, s) {
-    state = AsyncValue.error(e, s);
-    ref.showExceptionSheet(e);
-  }
-}
-
-// 6. View reacts to state changes
-final authState = ref.watch(authProvider);
-final isLoading = authState.isLoading;
-```
-
-## Provider Type Guidelines
-
-### Allowed Provider Types by Layer
-
-#### Dependency Injection (Any Layer)
-```dart
-// ✅ Provider - for dependency injection only
-final httpClientProvider = Provider<http.Client>((ref) => http.Client());
-final configProvider = Provider<AppConfig>((ref) => AppConfig.fromEnvironment());
-```
-
-#### ViewModel/Provider Layer ONLY
-```dart
-// ✅ NotifierProvider - for synchronous state management
-final counterProvider = NotifierProvider<CounterNotifier, int>(() => CounterNotifier());
-
-// ✅ AsyncNotifierProvider - for asynchronous state management  
-final userProvider = AsyncNotifierProvider<UserNotifier, User>(() => UserNotifier());
-
-// ✅ StreamNotifierProvider - for stream-based state management
-final messagesProvider = StreamNotifierProvider<MessagesNotifier, List<Message>>(() => MessagesNotifier());
-```
-
-#### Data Layer (Simple Data Fetching)
-```dart
-// ✅ FutureProvider - for simple data fetching (not in ViewModel layer)
-final configDataProvider = FutureProvider<Config>((ref) async {
-  return ref.read(configRepositoryProvider).getConfig();
-});
-
-// ✅ StreamProvider - for simple stream data (not in ViewModel layer)
-final timeProvider = StreamProvider<DateTime>((ref) {
-  return Stream.periodic(Duration(seconds: 1), (_) => DateTime.now());
-});
-```
-
-## Error Handling Architecture
-
-### Error Types
-1. **Network Errors**: Connection issues, timeouts
-2. **Authentication Errors**: Invalid credentials, expired tokens
-3. **Validation Errors**: Input validation failures
-4. **Business Logic Errors**: Domain-specific errors
-
-### Error Handling in ViewModels
-```dart
-class AuthProvider extends Notifier<AsyncValue<void>> {
-  Future<void> login(String email, String password) async {
-    state = const AsyncValue.loading();
-    
-    try {
-      final user = await ref.read(authRepositoryProvider).login(email, password);
-      // Handle success
-      state = const AsyncValue.data(null);
-    } on NetworkException catch (e) {
-      state = AsyncValue.error('Network error: ${e.message}', StackTrace.current);
-    } on AuthenticationException catch (e) {
-      state = AsyncValue.error('Authentication error: ${e.message}', StackTrace.current);
-      // Redirect to login if needed
-    } catch (e, s) {
-      state = AsyncValue.error(e, s);
-    }
-  }
-}
-```
-
-
-## Performance Considerations
-
-### 1. Provider Optimization
-- Use `select` to watch specific parts of state
-- Implement proper provider disposal with `autoDispose` when needed
-- Avoid unnecessary provider rebuilds
-
-### 2. Model Optimization
-- Use `const` constructors in Freezed models
-- Implement efficient `copyWith` methods
-- Use proper equality checks
-
-This simplified 4-layer architecture provides a clear separation of concerns while maintaining simplicity and enforcing strict rules for provider usage in the ViewModel layer. 

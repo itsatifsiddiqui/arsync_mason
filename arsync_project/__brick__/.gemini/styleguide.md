@@ -1,174 +1,293 @@
-# Flutter Coding Style Guide
+## Project Guidelines
 
-### 1. Flutter Hooks Usage
-Always use Flutter Hooks (flutter_hooks) for stateful logic where applicable. This improves code readability and promotes reactive patterns.
+### 1. Naming Conventions
+- **Files**: snake_case (e.g., `login_screen.dart`)
+- **Classes**: PascalCase (e.g., `LoginScreen`, `AppUser`)
+- **Variables/Methods**: camelCase (e.g., `emailController`, `validateForm`)
+- **Constants**: SCREAMING_SNAKE_CASE (e.g., `API_BASE_URL`)
+- **Private widgets**: Prefix with underscore (e.g., `_LoginForm`)
 
+## Architecture Reference
+
+**IMPORTANT**: Before writing any code, always refer to the complete architecture guide:
+📋 **Architecture Guide**: [Architecture Guidelines](../ai_instructions/architecture.md)
+
+This file contains the complete 4-layer architecture pattern, provider rules, and detailed implementation guidelines that must be followed strictly.
+
+## Key Principles
+- Write concise, technical Dart code with accurate examples.
+- Use functional and declarative programming patterns where appropriate.
+- Prefer composition over inheritance.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported widget, subwidgets, helpers, static content, types.
+- Prefer using private widgets over methods.
+- Only use methods for building widgets, where it is used only once.
+
+## Dart/Flutter
+- Use const constructors for immutable widgets.
+- Use arrow syntax or code block to make the code more readable for simple functions and methods.
+- Prefer expression bodies for one-line getters and setters.
+- Use trailing commas for better formatting and diffs.
+
+## Screen Structure Guidelines
+
+### Lean Screen Architecture
+- **Keep the body widget lean and organized**
+- **The body widget must not contain any Rows or Columns except the root level scrollable widget**
+- **Break down complex UI into private widget classes**
+- **Use composition over large widget trees**
+
+### Private Widget Composition Rules
 ```dart
-import 'package:flutter_hooks/flutter_hooks.dart';
-
-class MyScreen extends HookWidget {
+// ✅ CORRECT: Lean screen with private widget composition
+class LoginScreen extends HookConsumerWidget {
+  static String get routeName => 'login';
+  static String get routeLocation => '/$routeName';
+  
+  const LoginScreen({super.key});
+  
   @override
-  Widget build(BuildContext context) {
-    final counter = useState(0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Provider watches
+    final authState = ref.watch(authProvider);
+    
+    // Effects
+    useEffect(() {
+      // Side effects
+      return () {
+        // Cleanup
+      };
+    }, []);
+    
+    // ✅ Body widget is lean - only root scrollable widget
+    return Scaffold(
+      body: SingleChildScrollView(  // Only root level scrollable
+        child: Column(  // Only Column/Row allowed at root level
+          children: [
+            // ✅ Break down into private composable widgets
+            _HeaderSection(),
+            _LoginFormSection(
+              emailController: emailController,
+              passwordController: passwordController,
+            ),
+            _FooterSection(),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-    return Text('Counter: ${counter.value}');
+class _LoginFormSection extends HookConsumerWidget {
+  
+  const _LoginFormSection({super.key});
+  
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Hooks at the top
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final formKey = GlobalObkectKey<FormState>(context);
+    
+    
+    return Form(  // Only root level scrollable
+        key: formKey,
+        child: Column(  // Only Column/Row allowed at root level
+          children: [
+            // ✅ Break down into private composable widgets
+            PrimaryTextField(
+              controller: emailController,
+              title: 'Email',
+              validator: Validators.emailValidator,
+            ),
+            PrimaryTextField(
+              controller: passwordController,
+              title: 'Password',
+              validator: Validators.passwordValidator,
+              obscureText: true,
+            ),
+          ],
+        ),
+      );
   }
 }
 ```
 
-### 2. File & Folder Structure
-- Follow the proposed project structure with clear folders for hooks, models, providers, screens, utils, and widgets.
-- Keep main.dart, my_app.dart, and global config files (e.g., app_theme.dart) at the root of the lib folder.
-- Group related widgets and providers in feature-specific folders (e.g., screens/auth/, providers/auth/).
-
-Example Structure:
-
-```
- lib ➡ tree -L 2
-.
-├── app_theme.dart
-├── hooks
-│   └── keyboard_visibility.dart
-├── main.dart
-├── models
-│   ├── app_user.dart
-│   ├── app_user.freezed.dart
-│   └── app_user.g.dart
-├── my_app.dart
-├── providers
-│   ├── alert_provider.dart
-│   ├── app_user_provider.dart
-│   ├── auth
-│   ├── base_provider.dart
-│   ├── firebase_messaging_provider.dart
-│   ├── firestore_provider.dart
-│   ├── router_provider.dart
-│   ├── shared_preferences_provider.dart
-│   └── theme_provider.dart
-├── screens
-│   ├── auth
-│   ├── splash
-│   └── tabs_view
-├── utils
-│   ├── alert_extensions.dart
-│   ├── app_colors.dart
-│   ├── constants.dart
-│   ├── debouncer.dart
-│   ├── exception_toolkit.dart
-│   ├── extensions.dart
-│   ├── images.dart
-│   ├── logging_extensions.dart
-│   ├── padding_extensions.dart
-│   ├── utils.dart
-│   ├── validators.dart
-│   └── widget_utility_extensions.dart
-└── widgets
-    ├── measure_size.dart
-    ├── primary_button.dart
-    ├── primary_card.dart
-    ├── primary_error_widet.dart
-    ├── primary_info_widget.dart
-    ├── primary_loading_indicator.dart
-    ├── primary_progress_indicator.dart
-    ├── primary_sheet.dart
-    ├── primary_text_field.dart
-    └── primary_titled_drop_down.dart
-```
-
-### 3. Naming Conventions
-- **Dart naming:**
-  - Variables & methods: camelCase (e.g., userName, fetchData()).
-  - Classes & enums: PascalCase (e.g., UserSession, AppTheme).
-  - File names: snake_case (e.g., session_history_model.dart).
-- Match the filename and main widget name (e.g., my_screen.dart → class MyScreen extends StatelessWidget).
-- Use descriptive names for classes, methods, variables, and images—avoid cryptic or generic labels.
-
-### 4. Widget Structure & Best Practices
-- **Stateful Widgets:** Always call dispose() at the bottom of the class, and keep that logic clear and minimal.
-- **Smaller Modular Widgets:** Extract large widgets into smaller, reusable ones. If a widget is used in one place only, prefix it with _ to make it private (e.g., _MyLocalWidget).
-- Prefer composition over inheritance where possible.
-
-### 5. Static Lists & Model Organization
-Render lists by defining a static list in the model class for clarity. For example:
-
+### 3. Model Structure (Freezed)
 ```dart
-class SessionHistoryModel {
-  final DateTime date;
-  final double rating;
-  final String name;
+@freezed
+abstract class ModelName with _$ModelName {
+  const factory ModelName({
+    @JsonKey(includeToJson: false) String? id,
+    required String field1,
+    required String field2,
+    @Default(false) bool isActive,
+  }) = _ModelName;
 
-  SessionHistoryModel({
-    required this.date,
-    required this.rating,
-    required this.name,
-  });
+  const ModelName._();
 
-  static final List<SessionHistoryModel> sessionHistory = [
-    // ...
-  ];
+  factory ModelName.fromJson(Map<String, dynamic> json) =>
+      _$ModelNameFromJson(json);
+      
+  factory ModelName.fromFirestore(Map<String, dynamic> json, String id) {
+    return _$ModelNameFromJson(json).copyWith(id: id);
+  }
 }
 ```
 
-### 6. Navigation Rules
-- Keep Home/TabsView at the bottom of the navigation stack so that pressing the system Back button on those screens closes the app.
-- Organize navigation logic cleanly, typically in providers or well-structured flow methods.
-
-### 7. Colors & Images
-- **app_colors.dart:** Centralize color constants. Example:
-
+### 4. Repository Pattern
 ```dart
-// app_colors.dart
-import 'package:flutter/material.dart';
+final repositoryProvider = Provider<Repository>((ref) {
+  return Repository();
+});
 
-class AppColors {
-  static const primaryColor = Color(0xFF123456);
-  // ...
+class Repository {
+  // Data operations
+  Future<Model> getData() async {
+    // Implementation
+  }
+  
+  Future<void> saveData(Model data) async {
+    // Implementation
+  }
 }
 ```
 
-- **images.dart:** Store descriptive image path constants. Example:
-
+### 5. Provider Pattern
 ```dart
-// images.dart
-class AppImages {
-  static const loginBackground = 'assets/images/login_background.png';
-  static const profileAvatar   = 'assets/images/profile_avatar.png';
-  // ...
+final providerName = StateNotifierProvider<ProviderNotifier, State>((ref) {
+  return ProviderNotifier(ref);
+});
+
+class ProviderNotifier extends StateNotifier<State> {
+  final Ref ref;
+  
+  ProviderNotifier(this.ref) : super(initialState);
+  
+  Future<void> performAction() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      // Business logic
+      final result = await ref.read(repositoryProvider).getData();
+      state = state.copyWith(data: result, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+    }
+  }
 }
 ```
 
-### 8. Early Return Pattern
-Use early returns to avoid deeply nested conditionals:
+## UI/UX Guidelines
 
-```dart
-// Instead of:
-// if (formKey.currentState.validate() == true) {
-//   // do something
-// }
+### 1. Design System
+- **Font Family**: Inter (weights 100-900)
+- **Primary Color**: `#e02f32` (red theme)
+- **Border Radius**: 8dp default (`kBorderRadius`)
+- **Spacing**: 8dp base unit (use `.heightBox`, `.widthBox` extensions)
+- **Padding**: 16dp standard content padding
 
-// Use:
-if (formKey.currentState.validate() != true) return;
-// do something
-```
+### 2. Component Usage
+- **Buttons**: Use `PrimaryButton` widget
+- **Text Fields**: Use `PrimaryTextField` widget
+- **Cards**: Use `PrimaryCard` widget
+- **Loading**: Use `PrimaryLoadingIndicator` widget
+- **Sheets**: Use `PrimarySheet` widget
 
-### 9. Coding Conventions & Analysis
-- Use the provided analysis_options.yaml for linting. Respect warnings and hints.
-- Use const constructors wherever possible. Let your IDE auto-insert them upon save.
-- Prefer final for variables that are never reassigned and leverage Dart's type inference.
-- Use string interpolation over concatenation ('Hello $name' vs 'Hello ' + name).
-- Leverage Primary Widgets (e.g., PrimaryButton, PrimaryCard) to maintain consistent design across the app. You can extend these widgets as needed.
+### 3. Theme Support
+- Support both light and dark themes
+- Use adaptive colors: `context.adaptive`, `context.adaptive87`, etc.
+- Use theme-aware colors: `context.primaryColor`, `context.cardColor`
 
-### 10. Folder-Specific Guidelines
-- **screens/:** Group screens by feature (e.g., auth/, tabs_view/), and have a main widget per file.
-- **providers/:** Split providers by domain, keep logic minimal, and consider creating separate classes for complex operations.
-- **utils/:** Store app-wide utilities like debouncer.dart, exception_toolkit.dart, app_colors.dart, images.dart, etc.
-- **widgets/:** Contains reusable UI elements (PrimaryButton, PrimaryCard, etc.).
+### 4. Navigation
+- Use GoRouter for navigation
+- Define route names and locations as static getters
+- Use `context.pushNamed()` for navigation
+- Keep TabsView at bottom of navigation stack
 
-### Summary
-- Use Flutter Hooks + smaller, modular widgets.
-- Dispose logic at the bottom of stateful widgets.
-- Early returns to keep conditionals clean.
-- Centralize colors/images in app_colors.dart & images.dart.
-- Static lists in model classes for data clarity.
-- Navigation: Home/TabsView at bottom of the stack.
-- Primary Widgets for consistent design.
+## Development Rules
+
+### 1. Riverpod-Specific Guidelines
+- **STRICT PROVIDER RULES**: Refer to [Architecture Guidelines](./architecture.md) for complete provider type restrictions
+- **ViewModels/Providers Layer**: Only use `NotifierProvider`, `AsyncNotifierProvider`, `StreamNotifierProvider`
+- **Error Handling**: Use `ref.showExceptionSheet(e)` to show error messages from ViewModels
+- Prefer FutureProvider and StreamProvider for simple data fetching (not in ViewModel layer)
+- Avoid StateProvider, StateNotifierProvider, and ChangeNotifierProvider in ViewModel layer
+- Use ref.invalidate() for manually triggering provider updates
+- Implement proper cancellation of asynchronous operations when widgets are disposed
+
+### 2. Code Quality
+- Use `analysis_options.yaml` linting rules
+- Prefer `const` constructors where possible
+- Use early returns to avoid deep nesting
+- Use string interpolation over concatenation
+- Leverage existing Primary widgets instead of creating new ones
+
+### 3. State Management Rules
+- Use Flutter Hooks for local state
+- Use Riverpod providers for global state
+- Avoid `StateProvider` - prefer `StateNotifierProvider`
+- Use `ref.invalidate()` for manual provider updates
+- Implement proper error handling with `AsyncValue`
+
+### 4. Error Handling
+- Display errors using `SelectableText.rich` with red color
+- Handle empty states within displaying screens
+- Use try-catch blocks in providers
+- Log errors using custom logging extensions
+
+### 5. Performance
+- Use `const` widgets where possible
+- Implement `ListView.builder` for large lists
+- Use `cached_network_image` for remote images
+- Implement proper disposal in hooks and providers
+
+### 5. Firebase Integration
+- Use Firebase Auth for authentication
+- Use Firestore for data storage
+- Handle network errors properly
+- Use Firebase emulator for development
+
+
+## Performance Optimization
+- Use const widgets where possible to optimize rebuilds
+- Implement list view optimizations (e.g., ListView.builder)
+- Use AssetImage for static images and cached_network_image for remote images
+
+## Key Conventions
+
+2. Prefer stateless widgets:
+   - Use ConsumerWidget with Riverpod for state-dependent widgets
+   - Use HookConsumerWidget when combining Riverpod and Flutter Hooks
+
+## File Structure
+- Keep related files in feature folders
+- Use `part` files for generated code (Freezed, JSON)
+- Group providers by feature in subfolders
+- Keep utilities and extensions in utils folder
+
+## UI and Styling
+- Use Flutter's built-in widgets and create custom widgets
+- Use themes for consistent styling across the app
+- Use context.adaptive for adaptive text color as it manages light and dark text color
+- Always use Iconsax icons over material icons only if iconsax package is installed, if not installed don't try to add it.
+
+## Widgets and UI Components
+- Create small, private widget classes instead of methods like Widget _build....
+- Implement RefreshIndicator for pull-to-refresh functionality
+- In TextFields, set appropriate textCapitalization, keyboardType, and textInputAction
+- Always use CachedNetworkImage for remote images
+
+## Strict Rules - NEVER BREAK
+
+1. **NEVER** modify existing Primary widgets heavily - extend with parameters instead
+2. **NEVER** use code generation for Riverpod (`@riverpod` annotations)
+3. **NEVER** skip error handling in async operations except for `Repositories`
+4. **NEVER** use `print()` - use logging extensions instead
+5. **NEVER** hardcode strings - use constants or localization
+6. **NEVER** ignore linting warnings without good reason
+7. **NEVER** commit generated files to version control
+8. **NEVER** use `setState` - use Hooks or Riverpod instead
+9. **NEVER** create widgets without proper key handling
+10. **NEVER** skip input validation in forms
+
+Follow these rules strictly to maintain code quality, consistency, and project architecture integrity.
