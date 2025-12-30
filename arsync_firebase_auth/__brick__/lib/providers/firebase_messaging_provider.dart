@@ -103,7 +103,7 @@ class LocalNotificationService {
   void _initializeNotifications() async {
     // Android initialization
     const initializationSettingsAndroid = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      'mipmap/ic_launcher',
     );
 
     // iOS initialization
