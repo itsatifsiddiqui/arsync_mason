@@ -10,7 +10,6 @@ This repository contains reusable bricks that help accelerate Flutter developmen
 
 | Brick | Description |
 | ----- | ----------- |
-| [arsync_firebase_auth](arsync_firebase_auth) | Firebase authentication features including email, Google, Apple login, and more |
 | [arsync_project](arsync_project) | Project structure template for Arsync projects |
 
 ## Getting Started
@@ -29,24 +28,6 @@ A brick for setting up an Arsync project structure with predefined folders and c
 
 [View Documentation](arsync_project/README.md)
 
-### arsync_firebase_auth
-
-A brick for setting up Firebase Authentication with various providers.
-
-**Features:**
-- Email signup and login
-- Google authentication
-- Apple authentication
-- Phone authentication
-- Passwordless email authentication
-- Forgot password functionality
-- Email verification
-- Change password functionality
-
-[View Documentation](arsync_firebase_auth/README.md)
-
-
-
 ### Using Bricks
 
 
@@ -56,14 +37,10 @@ A brick for setting up Firebase Authentication with various providers.
 To install bricks globally on your machine:
 
 ```bash
-# Add the firebase auth brick globally
-mason add -g arsync_firebase_auth --git-url https://github.com/itsatifsiddiqui/arsync_mason.git --git-path arsync_firebase_auth
-
 # Add the project brick globally
 mason add -g arsync_project --git-url https://github.com/itsatifsiddiqui/arsync_mason.git --git-path arsync_project
 
 # Use the bricks from any directory
-mason make arsync_firebase_auth
 mason make arsync_project
 
 ```
@@ -78,9 +55,6 @@ cd arsync_mason
 
 # Get all dependencies
 mason get
-
-# Generate code with the arsync_firebase_auth brick
-mason add -g arsync_firebase_auth --path <path_to_cloned_repo>/arsync_firebase_auth
 
 # Generate code with the arsync_project brick
 mason add -g arsync_project --path <path_to_cloned_repo>/arsync_project

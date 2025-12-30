@@ -44,7 +44,7 @@ class ProfileTab extends ConsumerWidget {
   }
 
   void updateTheme(WidgetRef ref, String text) {
-    ref.read(themeModeProvider.notifier).update((_) => kThemeModes[text]!);
+    ref.read(themeModeProvider.notifier).setThemeMode(kThemeModes[text]!);
     ref.read(sharedPreferencesProvider).setTheme(text);
   }
 }

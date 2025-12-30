@@ -1,5 +1,3 @@
 bricks:
-  arsync_firebase_auth:
-    path: arsync_firebase_auth
   arsync_project:
     path: arsync_project
