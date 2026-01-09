@@ -2,19 +2,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'utils.dart';
+
 const kBorderRadius = 8.0;
+
+const kThemeModes = {
+  'System': ThemeMode.system,
+  'Light': ThemeMode.light,
+  'Dark': ThemeMode.dark,
+};
 
 Future<void> kLaunchUrl(String url) async {
   final uri = Uri.parse(url);
   if (await canLaunchUrl(uri)) {
     try {
       final result = await launchUrl(uri);
-      debugPrint(result.toString());
-      if (!result) {
-        await launchUrl(uri);
-      }
+      result.toString().log();
+      if (result) return;
+      await launchUrl(uri);
     } catch (e) {
-      debugPrint(e.toString());
+      e.toString().log();
     }
   } else {
     await launchUrl(uri);
@@ -40,7 +47,7 @@ Widget kImagePlaceHolderSmall(_, _) {
 Widget kErrorWidgetSmall(_, _, _) =>
     const Center(child: Icon(Icons.error_outline, color: Colors.red));
 
-Map<String, bool> generateBigram(String value) {
+Map<String, bool> kGenerateBigram(String value) {
   final map = <String, bool>{};
   final s1 = value.toLowerCase();
   const n = 2;

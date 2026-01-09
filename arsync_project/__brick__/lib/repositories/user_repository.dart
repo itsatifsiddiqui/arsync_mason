@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user/app_user.dart';
 import '../providers/core/shared_preferences_provider.dart';
 
-final userRepositoryProvider = Provider<UserRepository>((ref) {
+final userRepoProvider = Provider.autoDispose((ref) {
   final sharedPreferences = ref.read(sharedPreferencesProvider).prefs;
   return UserRepository(sharedPreferences);
 });

@@ -124,9 +124,11 @@ class RegisterScreen extends HookConsumerWidget {
 
       // We throw error so it can be catched in catch code block.
       if (!success) throw 'Register failed';
+      if (!context.mounted) return;
 
       context.showSuccessSnackBar('Registered successfully');
     } catch (e) {
+      if (!context.mounted) return;
       context.showErrorSnackBar(e.toString());
     } finally {
       isLoading.value = false;

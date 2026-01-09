@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:loading_overlay_pro/loading_overlay_pro.dart';
 
@@ -19,7 +17,7 @@ class PrimaryLoadingIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return LoadingOverlayPro(
       isLoading: isLoading,
-      backgroundColor: Colors.black.withOpacity(0.65),
+      backgroundColor: Colors.black.withValues(alpha: 0.65),
       progressIndicator: Material(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Container(

@@ -15,15 +15,15 @@ import '../auth/auth_provider.dart';
 import '../user/app_user_provider.dart';
 
 final routerProvider = Provider((ref) {
-  return RouterProvider(ref);
+  return _RouterProvider(ref);
 });
 
-class RouterProvider {
+class _RouterProvider {
   final navigatorKey = GlobalKey<NavigatorState>();
   late GoRouter router;
   final Ref ref;
 
-  RouterProvider(this.ref) {
+  _RouterProvider(this.ref) {
     router = GoRouter(
       initialLocation: SplashScreen.routeLocation,
       navigatorKey: navigatorKey,

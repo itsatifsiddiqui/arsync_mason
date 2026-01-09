@@ -7,13 +7,13 @@ import '../../utils/utils.dart';
 import 'router_provider.dart';
 
 final alertProvider = Provider.autoDispose((ref) {
-  return AlertProvider(ref);
+  return _AlertProvider(ref);
 });
 
-class AlertProvider {
+class _AlertProvider {
   final Ref ref;
 
-  AlertProvider(this.ref);
+  _AlertProvider(this.ref);
 
   void showCustomSnackbar(SnackBar snackbar) {
     final context = ref.read(routerProvider).navigatorKey.currentContext;
@@ -255,7 +255,7 @@ class AlertProvider {
 }
 
 extension AlertRef on Ref {
-  AlertProvider get alert => read(alertProvider);
+  _AlertProvider get alert => read(alertProvider);
 
   void showSuccessSnackBar(String text) => alert.showSuccessSnackBar(text);
   void showErrorSnackBar(String text) => alert.showErrorSnackBar(text);

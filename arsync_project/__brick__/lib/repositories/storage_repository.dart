@@ -1,9 +1,7 @@
-import 'dart:async';
-
 import 'package:cross_file/cross_file.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final storageRepoProvider = Provider<StorageRepository>((ref) {
+final storageRepoProvider = Provider.autoDispose<StorageRepository>((ref) {
   return StorageRepository();
 });
 

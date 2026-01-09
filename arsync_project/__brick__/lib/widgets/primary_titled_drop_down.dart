@@ -58,7 +58,7 @@ class PrimaryTitledDropDown<T> extends StatelessWidget {
             }
             return icon;
           }.call(),
-          value: value,
+          initialValue: value,
           dropdownColor: context.cardColor,
           menuMaxHeight: 0.6.sh(context),
           decoration: InputDecoration(

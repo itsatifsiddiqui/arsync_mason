@@ -18,7 +18,7 @@ class ForgotPasswordScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final emailController = useTextEditingController();
-    final formkey = GlobalKey<FormState>();
+    final formkey = GlobalObjectKey<FormState>(context);
     final isLoading = useState(false);
     return PrimaryLoadingIndicator(
       isLoading: isLoading.value,
@@ -74,9 +74,11 @@ class ForgotPasswordScreen extends HookConsumerWidget {
       // We throw error so it can be catched in catch code block.
       if (!success) throw 'Failed to send reset link';
 
+      if (!context.mounted) return;
       context.showSuccessSnackBar('Reset link sent successfully');
       context.goNamed(LoginScreen.routeName);
     } catch (e) {
+      if (!context.mounted) return;
       context.showErrorSnackBar(e.toString());
     } finally {
       isLoading.value = false;

@@ -5,13 +5,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/user/app_user.dart';
-import 'theme_provider.dart';
+import '../../utils/constants.dart';
 
 ///Override provider in provider scope
 final sharedPreferencesProvider = Provider<SharedPreferencesProvider>((ref) {
   throw UnimplementedError();
 });
 
+// ignore: provider_class_restriction
 class SharedPreferencesProvider {
   const SharedPreferencesProvider(this.prefs, this.ref);
   final SharedPreferences prefs;

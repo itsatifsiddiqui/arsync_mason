@@ -9,9 +9,9 @@ import '../core/router_provider.dart';
 import '../core/shared_preferences_provider.dart';
 import '../user/app_user_provider.dart';
 
-final authProvider = NotifierProvider(AuthProvider.new);
+final authProvider = NotifierProvider.autoDispose(AuthNotifier.new);
 
-class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
+class AuthNotifier extends Notifier<AsyncValue<AppUser?>> {
   @override
   AsyncValue<AppUser?> build() {
     return const AsyncValue.data(null);
@@ -26,7 +26,7 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
 
     try {
       final user = await ref
-          .read(authRepositoryProvider)
+          .read(authRepoProvider)
           .signUpWithEmailAndPassword(name, email, password);
       if (user == null) return null;
       ref.read(appUserProvider.notifier).setUser(user);
@@ -51,7 +51,7 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
 
     try {
       final user = await ref
-          .read(authRepositoryProvider)
+          .read(authRepoProvider)
           .signInWithEmailAndPassword(email, password);
       if (user == null) return null;
       ref.read(appUserProvider.notifier).setUser(user);
@@ -72,7 +72,7 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
     state = const AsyncValue.loading();
 
     try {
-      final user = await ref.read(authRepositoryProvider).signInWithGoogle();
+      final user = await ref.read(authRepoProvider).signInWithGoogle();
       if (user == null) return null;
       ref.read(appUserProvider.notifier).setUser(user);
 
@@ -92,7 +92,7 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
     state = const AsyncValue.loading();
 
     try {
-      final user = await ref.read(authRepositoryProvider).signInWithApple();
+      final user = await ref.read(authRepoProvider).signInWithApple();
       if (user == null) return null;
       ref.read(appUserProvider.notifier).setUser(user);
 
@@ -109,7 +109,7 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
   }
 
   Future<AppUser?> getUser() async {
-    final userid = ref.read(authRepositoryProvider).loggedInUserId;
+    final userid = ref.read(authRepoProvider).loggedInUserId;
     if (userid == null) {
       state = const AsyncValue.data(null);
       return null;
@@ -121,7 +121,7 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
       final savedUser = ref.read(sharedPreferencesProvider).getUser(userid);
 
       final user =
-          savedUser ?? await ref.read(userRepositoryProvider).getUser(userid);
+          savedUser ?? await ref.read(userRepoProvider).getUser(userid);
       _syncRemoteAndLocalUser(userid);
 
       state = AsyncValue.data(user);
@@ -137,25 +137,29 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
   }
 
   void _syncRemoteAndLocalUser(String userid) async {
-    final remoteUser = await ref.read(userRepositoryProvider).getUser(userid);
-    // User is deleted from the database
-    if (remoteUser == null) {
-      ref.read(sharedPreferencesProvider).removeUser(userid);
-      logout();
-      return;
-    }
+    try {
+      final remoteUser = await ref.read(userRepoProvider).getUser(userid);
+      // User is deleted from the database
+      if (remoteUser == null) {
+        ref.read(sharedPreferencesProvider).removeUser(userid);
+        logout();
+        return;
+      }
 
-    // Save user to local storage
-    ref.read(sharedPreferencesProvider).saveUser(remoteUser);
-    ref.read(appUserProvider.notifier).setUser(remoteUser);
+      // Save user to local storage
+      ref.read(sharedPreferencesProvider).saveUser(remoteUser);
+      ref.read(appUserProvider.notifier).setUser(remoteUser);
+    } catch (e) {
+      ref.showExceptionSheet(e);
+    }
   }
 
   Future<void> logout() async {
     try {
       state = const AsyncValue.loading();
-      final userid = ref.read(authRepositoryProvider).loggedInUserId;
+      final userid = ref.read(authRepoProvider).loggedInUserId;
 
-      await ref.read(authRepositoryProvider).logout();
+      await ref.read(authRepoProvider).logout();
       ref.read(sharedPreferencesProvider).removeUser(userid!);
       ref.read(routerProvider).navigateBasedAuthStatus();
       state = AsyncValue.data(null);
@@ -168,10 +172,10 @@ class AuthProvider extends Notifier<AsyncValue<AppUser?>> {
   Future<void> deleteAccount() async {
     try {
       state = const AsyncValue.loading();
-      final userid = ref.read(authRepositoryProvider).loggedInUserId;
+      final userid = ref.read(authRepoProvider).loggedInUserId;
       if (userid == null) throw Exception('No user is currently signed in');
 
-      await ref.read(authRepositoryProvider).deleteAccount();
+      await ref.read(authRepoProvider).deleteAccount();
 
       // Clear local storage
       ref.read(sharedPreferencesProvider).removeUser(userid);

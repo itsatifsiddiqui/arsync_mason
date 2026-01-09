@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,11 +6,11 @@ import '../providers/core/shared_preferences_provider.dart';
 import 'storage_repository.dart';
 import 'user_repository.dart';
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
+final authRepoProvider = Provider.autoDispose<AuthRepository>((ref) {
   return AuthRepository(
     storageRepo: ref.read(storageRepoProvider),
     sharedPreferences: ref.read(sharedPreferencesProvider).prefs,
-    userRepository: ref.read(userRepositoryProvider),
+    userRepository: ref.read(userRepoProvider),
   );
 });
 
@@ -35,7 +34,7 @@ class AuthRepository {
   ) async {
     await Future.delayed(const Duration(seconds: 2));
 
-    final userid = UniqueKey().toString();
+    final userid = DateTime.now().millisecondsSinceEpoch.toString();
 
     final user = AppUser(
       userid: userid,

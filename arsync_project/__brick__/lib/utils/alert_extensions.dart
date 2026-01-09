@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../widgets/confirmation_sheet.dart';
 import '../widgets/primary_sheet.dart';
 import 'exception_toolkit.dart';
 
@@ -111,22 +112,17 @@ extension AlertExtensions on BuildContext {
       context: this,
       builder: (context) {
         final titleWidget = Text(title);
-        final contentWidget = () {
-          // Show Content as first priority
-          if (content != null) return content;
-
-          if (message != null) return Text(message);
-          return null;
-        }.call();
-
-        onTap() => context.pop(popResult);
+        final contentWidget = content ?? (message != null ? Text(message) : null);
 
         if (Platform.isAndroid) {
           return AlertDialog(
             title: titleWidget,
             content: contentWidget,
             actions: <Widget>[
-              TextButton(onPressed: onTap, child: Text(buttonText)),
+              TextButton(
+                onPressed: () => context.pop(popResult),
+                child: Text(buttonText),
+              ),
             ],
           );
         }
@@ -135,7 +131,10 @@ extension AlertExtensions on BuildContext {
           title: titleWidget,
           content: contentWidget,
           actions: <Widget>[
-            CupertinoDialogAction(onPressed: onTap, child: Text(buttonText)),
+            CupertinoDialogAction(
+              onPressed: () => context.pop(popResult),
+              child: Text(buttonText),
+            ),
           ],
         );
       },
@@ -165,107 +164,17 @@ extension AlertExtensions on BuildContext {
     FutureOr<T?> Function()? onActionPressed,
     FutureOr<T?> Function()? onActionPressedNegative,
   }) {
-    // Either of the actions is a Future and we need to wait for the result
-    final waitForActionResult = onActionPressed.runtimeType.toString().contains(
-      'Future',
-    );
-
-    final waitForNegativeActionResult = onActionPressedNegative.runtimeType
-        .toString()
-        .contains('Future');
-
-    bool isActionLoading = false;
-    bool isActionNegativeLoading = false;
-
     return showDialog<T?>(
       context: this,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final titleWidget = Text(title);
-            final contentWidget = () {
-              // Show Content as first priority
-              if (content != null) return content;
-
-              if (message != null) return Text(message);
-              return null;
-            }.call();
-
-            Future<void> onActionTap() async {
-              if (waitForActionResult) {
-                try {
-                  isActionLoading = true;
-                  setState(() {});
-                  final result = await onActionPressed?.call() ?? true;
-                  isActionLoading = false;
-                  setState(() {});
-                  return context.pop(result);
-                } catch (e) {
-                  isActionLoading = false;
-                  setState(() {});
-                  context.pop();
-                }
-              } else {
-                onActionPressed?.call() ?? context.pop(true);
-              }
-            }
-
-            Future<void> onActionTapNegative() async {
-              if (waitForNegativeActionResult) {
-                try {
-                  isActionNegativeLoading = true;
-                  setState(() {});
-                  final result = await onActionPressedNegative?.call() ?? true;
-                  isActionNegativeLoading = false;
-                  setState(() {});
-                  return context.pop(result);
-                } catch (e) {
-                  isActionNegativeLoading = false;
-                  setState(() {});
-                  onActionPressedNegative?.call();
-                }
-              } else {
-                onActionPressedNegative?.call() ?? context.pop(false);
-              }
-            }
-
-            final actionButtonChild = isActionLoading
-                ? const CupertinoActivityIndicator()
-                : Text(actionText);
-
-            final actionButtonNegativeChild = isActionNegativeLoading
-                ? const CupertinoActivityIndicator()
-                : Text(actionTextNegative);
-
-            if (Platform.isAndroid) {
-              return AlertDialog(
-                title: titleWidget,
-                content: contentWidget,
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: onActionTapNegative,
-                    child: actionButtonNegativeChild,
-                  ),
-                  TextButton(onPressed: onActionTap, child: actionButtonChild),
-                ],
-              );
-            }
-
-            return CupertinoAlertDialog(
-              title: titleWidget,
-              content: contentWidget,
-              actions: <Widget>[
-                CupertinoDialogAction(
-                  onPressed: onActionTapNegative,
-                  child: actionButtonNegativeChild,
-                ),
-                CupertinoDialogAction(
-                  onPressed: onActionTap,
-                  child: actionButtonChild,
-                ),
-              ],
-            );
-          },
+      builder: (dialogContext) {
+        return _ConfirmationDialogContent<T>(
+          title: title,
+          message: message,
+          content: content,
+          actionText: actionText,
+          actionTextNegative: actionTextNegative,
+          onActionPressed: onActionPressed,
+          onActionPressedNegative: onActionPressedNegative,
         );
       },
     );
@@ -410,6 +319,124 @@ extension AlertExtensions on BuildContext {
         iconWidget: iconWidget,
         positiveButtonText: positiveButtonText,
       ),
+    );
+  }
+}
+
+
+
+class _ConfirmationDialogContent<T> extends StatefulWidget {
+  final String title;
+  final String? message;
+  final Widget? content;
+  final String actionText;
+  final String actionTextNegative;
+  final FutureOr<T?> Function()? onActionPressed;
+  final FutureOr<T?> Function()? onActionPressedNegative;
+
+  const _ConfirmationDialogContent({
+    required this.title,
+    required this.actionText,
+    required this.actionTextNegative,
+    this.message,
+    this.content,
+    this.onActionPressed,
+    this.onActionPressedNegative,
+  });
+
+  @override
+  State<_ConfirmationDialogContent<T>> createState() =>
+      _ConfirmationDialogContentState<T>();
+}
+
+class _ConfirmationDialogContentState<T>
+    extends State<_ConfirmationDialogContent<T>> {
+  bool _isActionLoading = false;
+  bool _isActionNegativeLoading = false;
+
+  bool get _waitForActionResult =>
+      widget.onActionPressed.runtimeType.toString().contains('Future');
+
+  bool get _waitForNegativeActionResult =>
+      widget.onActionPressedNegative.runtimeType.toString().contains('Future');
+
+  Future<void> _handlePositiveAction() async {
+    if (!_waitForActionResult) {
+      widget.onActionPressed?.call() ?? context.pop(true);
+      return;
+    }
+    setState(() => _isActionLoading = true);
+    try {
+      final result = await widget.onActionPressed?.call() ?? true;
+      if (!mounted) return;
+      context.pop(result);
+    } catch (_) {
+      if (!mounted) return;
+      context.pop();
+    } finally {
+      if (mounted) setState(() => _isActionLoading = false);
+    }
+  }
+
+  Future<void> _handleNegativeAction() async {
+    if (!_waitForNegativeActionResult) {
+      widget.onActionPressedNegative?.call() ?? context.pop(false);
+      return;
+    }
+    setState(() => _isActionNegativeLoading = true);
+    try {
+      final result = await widget.onActionPressedNegative?.call() ?? true;
+      if (!mounted) return;
+      context.pop(result);
+    } catch (_) {
+      if (!mounted) return;
+      widget.onActionPressedNegative?.call();
+    } finally {
+      if (mounted) setState(() => _isActionNegativeLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final titleWidget = Text(widget.title);
+    final contentWidget =
+        widget.content ?? (widget.message != null ? Text(widget.message!) : null);
+
+    final actionButtonChild = _isActionLoading
+        ? const CupertinoActivityIndicator()
+        : Text(widget.actionText);
+
+    final actionButtonNegativeChild = _isActionNegativeLoading
+        ? const CupertinoActivityIndicator()
+        : Text(widget.actionTextNegative);
+
+    if (Platform.isAndroid) {
+      return AlertDialog(
+        title: titleWidget,
+        content: contentWidget,
+        actions: <Widget>[
+          TextButton(
+            onPressed: _handleNegativeAction,
+            child: actionButtonNegativeChild,
+          ),
+          TextButton(onPressed: _handlePositiveAction, child: actionButtonChild),
+        ],
+      );
+    }
+
+    return CupertinoAlertDialog(
+      title: titleWidget,
+      content: contentWidget,
+      actions: <Widget>[
+        CupertinoDialogAction(
+          onPressed: _handleNegativeAction,
+          child: actionButtonNegativeChild,
+        ),
+        CupertinoDialogAction(
+          onPressed: _handlePositiveAction,
+          child: actionButtonChild,
+        ),
+      ],
     );
   }
 }

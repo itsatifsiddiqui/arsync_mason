@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../utils/utils.dart';
 
-class PrimaryCard extends ConsumerWidget {
+class PrimaryCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showChevron;
   final Widget child;
@@ -42,7 +41,7 @@ class PrimaryCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cardContnet = InkWell(
       borderRadius: BorderRadius.circular(borderRadius),
       onTap: onTap,
